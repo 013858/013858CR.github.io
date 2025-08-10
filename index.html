@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clash Royale Deck Creator - Drag & Drop + Stats Popup</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #1e40af; /* blue background */
+    font-family: Arial, sans-serif;
+    color: #222;
+  }
+  body {
+    display: flex;
+    height: 100vh;
+  }
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 20px;
+    overflow-y: auto;
+  }
+  #deck-container {
+    border-bottom: 2px solid #daa520;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+  #deck-container h2 {
+    color: #facc15;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #clear-deck-btn {
+    background: #b45309;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    user-select: none;
+    transition: background 0.3s ease;
+  }
+  #clear-deck-btn:hover {
+    background: #78350f;
+  }
+  #deck {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  /* gradient border for first two slots */
+  .deck-slot.first-two {
+    border-image: linear-gradient(135deg, purple, gold) 1;
+    border-width: 3px;
+    border-style: solid;
+  }
+  .deck-slot.empty {
+    border-color: #daa520;
+    background-color: #1e3a8a;
+  }
+  .deck-slot {
+    width: 80px;
+    height: 110px;
+    border: 2px solid #daa520;
+    background-color: #1e3a8a; /* darker blue */
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    user-select: none;
+  }
+  .deck-slot img {
+    max-width: 60px;
+    max-height: 60px;
+    pointer-events: none;
+  }
+  .deck-slot .elixir {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    background: gold;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-weight: bold;
+    color: #222;
+    font-size: 12px;
+  }
+  .deck-slot.empty::after {
+    content: "Empty";
+    color: #daa520;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  /* Stat icon in deck slot */
+  .deck-slot .stats-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    color: gold;
+    user-select: none;
+  }
+
+  /* Average Elixir display at end of deck */
+  #average-elixir-display {
+    margin-top: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: gold; /* changed color to gold */
+  }
+
+  /* stacked groups vertically, cards inside group horizontally */
+  #cards-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column; /* vertical stack */
+    gap: 20px;
+  }
+  .card-group {
+    max-width: 100%;
+    display: flex;       /* cards side by side */
+    gap: 10px;          /* cards closer horizontally */
+    flex-wrap: wrap;     /* wrap cards if needed */
+  }
+  .card-group h3 {
+    width: 100%;
+    margin-top: 0;
+    border-bottom: 2px solid #daa520;
+    padding-bottom: 5px;
+    color: #facc15;
+  }
+  .card {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    padding: 4px 6px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 0 5px rgb(218 165 32 / 0.5);
+    cursor: grab;
+    user-select: none;
+    transition: background 0.2s ease;
+    position: relative;
+  }
+  .card:active {
+    cursor: grabbing;
+  }
+  .card:hover {
+    background: #fde68a;
+  }
+  .card img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    pointer-events: none;
+  }
+  .card .elixir {
+    font-weight: bold;
+    color: #b45309;
+    min-width: 22px;
+    text-align: center;
+  }
+  .card .name {
+    flex: 1;
+  }
+  .stats-icon {
+    cursor: pointer;
+    user-select: none;
+    margin-left: 6px;
+    font-size: 16px;
+    color: gold;
+  }
+
+  #saved-decks-container {
+    width: 320px;
+    border-left: 2px solid #daa520;
+    padding-left: 15px;
+    background: #0f172a;
+    color: #facc15;
+    overflow-y: auto;
+  }
+  #saved-decks-container h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #daa520;
+    padding-bottom: 5px;
+  }
+  #saved-decks {
+    margin-top: 10px;
+  }
+  .saved-deck {
+    background: #1e3a8a;
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgb(218 165 32 / 0.6);
+    margin-bottom: 12px;
+    padding: 10px;
+    position: relative;
+  }
+  .saved-deck-name {
+    font-weight: bold;
+    color: #fbbf24;
+    margin-bottom: 6px;
+  }
+  .saved-deck-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .saved-deck-cards img {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #daa520;
+    border-radius: 4px;
+  }
+  .delete-deck-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: transparent;
+    border: none;
+    color: #f87171;
+    font-size: 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .delete-deck-btn:hover {
+    color: #b91c1c;
+  }
+  .edit-deck-btn {
+    position: absolute;
+    top: 6px;
+    right: 34px;
+    background: transparent;
+    border: none;
+    color: #38bdf8; /* bright blue */
+    font-size: 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .edit-deck-btn:hover {
+    color: #0ea5e9;
+  }
+
+  form {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #daa520;
+    font-weight: bold;
+    color: #444;
+  }
+  button[type="submit"] {
+    background: #daa520;
+    border: none;
+    color: #222;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button[type="submit"]:hover:not(:disabled) {
+    background: #b8860b;
+  }
+  button[type="submit"]:disabled {
+    background: #e0c97a;
+    cursor: not-allowed;
+  }
+
+  /* Drag hover highlight */
+  .deck-slot.drag-over {
+    box-shadow: 0 0 15px 4px gold;
+  }
+  .card.dragging {
+    opacity: 0.5;
+  }
+
+  /* Stats Popup */
+  #stats-popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  #stats-popup {
+    background: #1e3a8a;
+    border-radius: 10px;
+    padding: 20px;
+    width: 280px;
+    color: #facc15;
+    box-shadow: 0 0 15px gold;
+    text-align: center;
+  }
+  #stats-popup img {
+    max-width: 100px;
+    max-height: 100px;
+    margin-bottom: 10px;
+  }
+  #stats-popup h3 {
+    margin: 5px 0;
+  }
+  #stats-popup p {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  #stats-popup .elixir-cost {
+    font-weight: bold;
+    font-size: 16px;
+    color: gold;
+  }
+  #stats-popup-close {
+    cursor: pointer;
+    background: #daa520;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #222;
+  }
+</style>
+</head>
+<body>
+
+<div id="main">
+  <div id="deck-container">
+    <h2>
+      Your Deck (8 Cards)
+      <button id="clear-deck-btn" title="Clear the deck">Clear Deck</button>
+    </h2>
+    <div id="deck" aria-label="Your deck slots" role="list">
+      <!-- 8 slots will be rendered here -->
+    </div>
+    <div id="average-elixir-display" aria-live="polite" aria-atomic="true"></div>
+    <form id="save-form" aria-label="Save deck form">
+      <input type="text" id="deck-name" placeholder="Enter deck name" maxlength="20" aria-required="true" />
+      <button type="submit" disabled>Save Deck</button>
+    </form>
+  </div>
+
+  <div id="cards-list" aria-label="Available cards">
+    <!-- cards grouped by type rendered here -->
+  </div>
+</div>
+
+<div id="saved-decks-container" aria-live="polite" aria-atomic="true">
+  <h2>Saved Decks</h2>
+  <div id="saved-decks"></div>
+</div>
+
+<!-- Stats Popup -->
+<div id="stats-popup-overlay" role="dialog" aria-modal="true" aria-labelledby="stats-popup-title" aria-describedby="stats-popup-desc">
+  <div id="stats-popup">
+    <img id="stats-popup-img" src="" alt="" />
+    <h3 id="stats-popup-title"></h3>
+    <p id="stats-popup-desc"></p>
+    <div class="elixir-cost">Elixir Cost: <span id="stats-popup-elixir"></span></div>
+    <button id="stats-popup-close">Close</button>
+  </div>
+</div>
+
+<script>
+  const cards = [
+    { key: 'cannon', name: 'Cannon', elixir: 3, type: 'building',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/CannonCard.webp',
+      stats: 'Cheap defensive building.' },
+    { key: 'fireball', name: 'Fireball', elixir: 4, type: 'spell',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/FireballCard.webp',
+      stats: 'Area damage spell.' },
+    { key: 'zap', name: 'Zap', elixir: 2, type: 'spell',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/ZapCard.webp',
+      stats: 'Stuns and damages small area.' },
+    { key: 'goblin_drill', name: 'Goblin Drill', elixir: 4, type: 'building',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/GoblinDrillCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'tesla', name: 'Tesla', elixir: 4, type: 'building',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/TeslaCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'poison', name: 'Poison', elixir: 4, type: 'spell',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/PoisonCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'freeze', name: 'Freeze', elixir: 4, type: 'spell',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/FreezeCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'mortar', name: 'Mortar', elixir: 4, type: 'building',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/MortarCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'electro_spirit', name: 'Electro Spirit', elixir: 2, type: 'troop',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/ElectroSpiritCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'fire_spirit', name: 'Fire Spirit', elixir: 2, type: 'troop',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/FireSpiritsCard.webp',
+      stats: 'High damage ramping building.' },
+    { key: 'skeletons', name: 'Skeletons', elixir: 2, type: 'troop',
+      img: '/Users/013858/Desktop/Desktop/Digital solutions/personalProjects/ClashRoyale/SkeletonsCard.webp',
+      stats: 'High damage ramping building.' },
+  ];
+
+  // Sort cards alphabetically by name
+  cards.sort((a, b) => a.name.localeCompare(b.name));
+
+  const deckSlotsCount = 8;
+  let deck = new Array(deckSlotsCount).fill(null);
+  let savedDecks = JSON.parse(localStorage.getItem('savedDecks') || '[]');
+
+  const deckEl = document.getElementById('deck');
+  const cardsListEl = document.getElementById('cards-list');
+  const clearDeckBtn = document.getElementById('clear-deck-btn');
+  const saveForm = document.getElementById('save-form');
+  const deckNameInput = document.getElementById('deck-name');
+  const saveBtn = saveForm.querySelector('button[type="submit"]');
+  const savedDecksContainer = document.getElementById('saved-decks');
+  const averageElixirDisplay = document.getElementById('average-elixir-display');
+
+  // Stats popup elements
+  const statsPopupOverlay = document.getElementById('stats-popup-overlay');
+  const statsPopupImg = document.getElementById('stats-popup-img');
+  const statsPopupTitle = document.getElementById('stats-popup-title');
+  const statsPopupDesc = document.getElementById('stats-popup-desc');
+  const statsPopupElixir = document.getElementById('stats-popup-elixir');
+  const statsPopupCloseBtn = document.getElementById('stats-popup-close');
+
+  // Render deck slots
+  function renderDeck() {
+    deckEl.innerHTML = '';
+    for (let i = 0; i < deckSlotsCount; i++) {
+      const slot = document.createElement('div');
+      slot.classList.add('deck-slot');
+      if (i < 2) slot.classList.add('first-two'); // gradient border for first 2 slots
+
+      if (!deck[i]) {
+        slot.classList.add('empty');
+      } else {
+        const card = deck[i];
+        const img = document.createElement('img');
+        img.src = card.img;
+        img.alt = card.name;
+        slot.appendChild(img);
+
+        const elixirBadge = document.createElement('div');
+        elixirBadge.classList.add('elixir');
+        elixirBadge.textContent = card.elixir;
+        slot.appendChild(elixirBadge);
+
+        // Add stat icon (crown)
+        const statIcon = document.createElement('span');
+        statIcon.className = 'stats-icon';
+        statIcon.innerHTML = '&#x1F451;'; // crown emoji
+        statIcon.title = 'View stats';
+        statIcon.addEventListener('click', e => {
+          e.stopPropagation();
+          openStatsPopup(card);
+        });
+        slot.appendChild(statIcon);
+      }
+
+      slot.dataset.index = i;
+      slot.setAttribute('role', 'listitem');
+      slot.setAttribute('aria-label', deck[i] ? deck[i].name : 'Empty slot');
+
+      // Drag and drop handlers for swapping/removing cards
+      slot.addEventListener('dragover', e => {
+        e.preventDefault();
+        slot.classList.add('drag-over');
+      });
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('drag-over');
+      });
+      slot.addEventListener('drop', e => {
+        e.preventDefault();
+        slot.classList.remove('drag-over');
+        const type = e.dataTransfer.getData('type');
+        if (type === 'card-list') {
+          const cardKey = e.dataTransfer.getData('cardKey');
+          const cardToAdd = cards.find(c => c.key === cardKey);
+          if (!cardToAdd) return;
+          // Add card to this slot if empty or swap if occupied
+          deck[i] = cardToAdd;
+          renderDeck();
+          renderCards();
+          updateSaveButton();
+        } else if (type === 'deck-card') {
+          const fromIndex = parseInt(e.dataTransfer.getData('fromIndex'), 10);
+          if (fromIndex === i) return;
+
+          // Swap cards between fromIndex and i
+          const temp = deck[i];
+          deck[i] = deck[fromIndex];
+          deck[fromIndex] = temp;
+          renderDeck();
+          renderCards();
+          updateSaveButton();
+        }
+      });
+
+      // Click on deck slot removes card from deck
+      slot.addEventListener('click', () => {
+        if (deck[i]) {
+          deck[i] = null;
+          renderDeck();
+          renderCards();
+          updateSaveButton();
+        }
+      });
+
+      // Make deck slots draggable
+      slot.setAttribute('draggable', true);
+      slot.addEventListener('dragstart', e => {
+        if (!deck[i]) {
+          e.preventDefault();
+          return;
+        }
+        e.dataTransfer.setData('type', 'deck-card');
+        e.dataTransfer.setData('fromIndex', i);
+        slot.classList.add('dragging');
+      });
+      slot.addEventListener('dragend', () => {
+        slot.classList.remove('dragging');
+      });
+
+      deckEl.appendChild(slot);
+    }
+    updateAverageElixir();
+  }
+
+  // Render cards grouped by type, excluding those already in deck
+  function renderCards() {
+    cardsListEl.innerHTML = '';
+    const groups = { troop: [], spell: [], building: [] };
+
+    deck.forEach(c => { if (c) groups[c.type].push(c.key); });
+
+    ['troop', 'spell', 'building'].forEach(type => {
+      const groupCards = cards.filter(c => c.type === type && !groups[type].includes(c.key));
+      if (groupCards.length === 0) return;
+
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'card-group';
+      const groupTitle = document.createElement('h3');
+      groupTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1) + 's';
+      groupDiv.appendChild(groupTitle);
+
+      groupCards.forEach(card => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card';
+        cardDiv.draggable = true;
+
+        const img = document.createElement('img');
+        img.src = card.img;
+        img.alt = card.name;
+        cardDiv.appendChild(img);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'name';
+        nameSpan.textContent = card.name;
+        cardDiv.appendChild(nameSpan);
+
+        const elixirSpan = document.createElement('span');
+        elixirSpan.className = 'elixir';
+        elixirSpan.textContent = card.elixir;
+        cardDiv.appendChild(elixirSpan);
+
+        // Stat sheet icon (crown)
+        const statIcon = document.createElement('span');
+        statIcon.className = 'stats-icon';
+        statIcon.innerHTML = '&#x1F451;'; // crown emoji
+        statIcon.title = 'View stats';
+        statIcon.addEventListener('click', e => {
+          e.stopPropagation();
+          openStatsPopup(card);
+        });
+        cardDiv.appendChild(statIcon);
+
+        cardDiv.addEventListener('click', () => {
+          const firstEmpty = deck.findIndex(c => !c);
+          if (firstEmpty !== -1) {
+            deck[firstEmpty] = card;
+            renderDeck();
+            renderCards();
+            updateSaveButton();
+          }
+        });
+
+        cardDiv.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('type', 'card-list');
+          e.dataTransfer.setData('cardKey', card.key);
+          cardDiv.classList.add('dragging');
+        });
+        cardDiv.addEventListener('dragend', () => {
+          cardDiv.classList.remove('dragging');
+        });
+
+        groupDiv.appendChild(cardDiv);
+      });
+
+      cardsListEl.appendChild(groupDiv);
+    });
+  }
+
+  // Update Save button enable/disable based on deck & name
+  function updateSaveButton() {
+    const deckHasCards = deck.some(c => c !== null);
+    const nameHasText = deckNameInput.value.trim().length > 0;
+    saveBtn.disabled = !(deckHasCards && nameHasText);
+  }
+
+  function updateAverageElixir() {
+    const cardsInDeck = deck.filter(c => c !== null);
+    if (cardsInDeck.length === 0) {
+      averageElixirDisplay.textContent = '';
+      return;
+    }
+    const avg = (cardsInDeck.reduce((acc, c) => acc + c.elixir, 0) / cardsInDeck.length).toFixed(2);
+    averageElixirDisplay.textContent = `Average Elixir Cost: ${avg}`;
+  }
+
+  // Open stats popup
+  function openStatsPopup(card) {
+    statsPopupImg.src = card.img;
+    statsPopupImg.alt = card.name;
+    statsPopupTitle.textContent = card.name;
+    statsPopupDesc.textContent = card.stats;
+    statsPopupElixir.textContent = card.elixir;
+    statsPopupOverlay.style.display = 'flex';
+  }
+  statsPopupCloseBtn.addEventListener('click', () => {
+    statsPopupOverlay.style.display = 'none';
+  });
+  statsPopupOverlay.addEventListener('click', (e) => {
+    if (e.target === statsPopupOverlay) {
+      statsPopupOverlay.style.display = 'none';
+    }
+  });
+
+  // Save decks to localStorage
+  function saveDecksToStorage() {
+    localStorage.setItem('savedDecks', JSON.stringify(savedDecks));
+  }
+
+  // Render saved decks list
+  function renderSavedDecks() {
+    savedDecksContainer.innerHTML = '';
+    savedDecks.forEach((deckObj, idx) => {
+      const deckDiv = document.createElement('div');
+      deckDiv.className = 'saved-deck';
+      deckDiv.setAttribute('tabindex', '0');
+      deckDiv.setAttribute('role', 'button');
+      deckDiv.setAttribute('aria-label', `Load saved deck ${deckObj.name}`);
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'saved-deck-name';
+      nameDiv.textContent = deckObj.name;
+      deckDiv.appendChild(nameDiv);
+
+      const cardsDiv = document.createElement('div');
+      cardsDiv.className = 'saved-deck-cards';
+
+      deckObj.cards.forEach(cardKey => {
+        const cardData = cards.find(c => c.key === cardKey);
+        if (!cardData) return;
+        const img = document.createElement('img');
+        img.src = cardData.img;
+        img.alt = cardData.name;
+        cardsDiv.appendChild(img);
+      });
+
+      deckDiv.appendChild(cardsDiv);
+
+      // Pencil icon for instant delete + load deck
+      const editBtn = document.createElement('button');
+      editBtn.className = 'edit-deck-btn';
+      editBtn.title = 'Delete deck and load it';
+      editBtn.innerHTML = '&#9998;'; // pencil icon
+      editBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        // Delete deck immediately
+        savedDecks.splice(idx, 1);
+        saveDecksToStorage();
+        renderSavedDecks();
+        // Load deck cards into deck variable and deck name input
+        deck = new Array(deckSlotsCount).fill(null);
+        deckObj.cards.forEach((key, i) => {
+          const c = cards.find(card => card.key === key);
+          if (c) deck[i] = c;
+        });
+        deckNameInput.value = deckObj.name;
+        renderDeck();
+        renderCards();
+        updateSaveButton();
+      });
+      deckDiv.appendChild(editBtn);
+
+      // Delete button
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-deck-btn';
+      delBtn.title = 'Delete deck';
+      delBtn.innerHTML = '&times;';
+      delBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (confirm(`Delete deck "${deckObj.name}"?`)) {
+          savedDecks.splice(idx, 1);
+          saveDecksToStorage();
+          renderSavedDecks();
+        }
+      });
+      deckDiv.appendChild(delBtn);
+
+      // Click on saved deck loads it
+      deckDiv.addEventListener('click', () => {
+        deck = new Array(deckSlotsCount).fill(null);
+        deckObj.cards.forEach((key, i) => {
+          const c = cards.find(card => card.key === key);
+          if (c) deck[i] = c;
+        });
+        deckNameInput.value = deckObj.name;
+        renderDeck();
+        renderCards();
+        updateSaveButton();
+      });
+
+      savedDecksContainer.appendChild(deckDiv);
+    });
+  }
+
+  // Check if deck with same cards and same first two cards (ignoring order) exists
+  function isDuplicateDeck(newDeckCards) {
+    if (newDeckCards.length !== deckSlotsCount) return false;
+    const newCardsSorted = [...newDeckCards].filter(Boolean).map(c => c.key).sort();
+    const newFirstTwo = newDeckCards.slice(0, 2).filter(Boolean).map(c => c.key);
+
+    for (const saved of savedDecks) {
+      if (saved.cards.length !== deckSlotsCount) continue;
+      const savedCardsSorted = [...saved.cards].sort();
+      const savedFirstTwo = saved.cards.slice(0, 2).filter(Boolean);
+
+      if (arraysEqual(newCardsSorted, savedCardsSorted)) {
+        if (newFirstTwo.length === savedFirstTwo.length &&
+          newFirstTwo.every(c => savedFirstTwo.includes(c))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Utility function to check array equality
+  function arraysEqual(a1, a2) {
+    if (a1.length !== a2.length) return false;
+    for (let i = 0; i < a1.length; i++) {
+      if (a1[i] !== a2[i]) return false;
+    }
+    return true;
+  }
+
+  // Save form submit handler
+  saveForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = deckNameInput.value.trim();
+    if (!name) return;
+
+    // Check if deck name exists - no duplicates allowed
+    if (savedDecks.some(d => d.name.toLowerCase() === name.toLowerCase())) {
+      alert('A deck with this name already exists. Please choose a different name.');
+      return;
+    }
+
+    if (deck.some(c => c === null)) {
+      alert('Please fill all deck slots before saving.');
+      return;
+    }
+
+    if (isDuplicateDeck(deck)) {
+      alert('A deck with the same cards and same first two cards already exists.');
+      return;
+    }
+
+    savedDecks.push({
+      name: name,
+      cards: deck.map(c => c.key)
+    });
+    saveDecksToStorage();
+    renderSavedDecks();
+    deckNameInput.value = '';
+    updateSaveButton();
+    alert(`Deck "${name}" saved!`);
+  });
+
+  clearDeckBtn.addEventListener('click', () => {
+    if (confirm('Clear the deck?')) {
+      deck = new Array(deckSlotsCount).fill(null);
+      renderDeck();
+      renderCards();
+      updateSaveButton();
+    }
+  });
+
+  deckNameInput.addEventListener('input', updateSaveButton);
+
+  function init() {
+    renderDeck();
+    renderCards();
+    renderSavedDecks();
+    updateSaveButton();
+  }
+
+  init();
+</script>
+
+</body>
+</html>
