@@ -10,7 +10,7 @@
     margin: 0;
     background: #1e40af; /* blue background */
     font-family: Arial, sans-serif;
-    color: #222;
+    color: #222222;
   }
   body {
     display: flex;
@@ -113,6 +113,24 @@
     user-select: none;
   }
 
+  /* Tower icon next to deck */
+  #deck-and-tower {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  /* *** CHANGED: tower icon matches slot size (80x110) and same border-radius *** */
+  #current-tower-icon {
+    width: 80px;
+    height: 110px;
+    border: 2px solid #daa520;
+    border-radius: 8px;
+    background: #1e3a8a;
+    object-fit: contain;
+  }
+
   /* Average Elixir display at end of deck */
   #average-elixir-display {
     margin-top: 8px;
@@ -207,23 +225,56 @@
     margin-bottom: 12px;
     padding: 10px;
     position: relative;
+    display: flex;
+    flex-direction: column; /* make column so tower can be shown below cards */
+    gap: 8px;
+  }
+  .saved-deck-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .saved-deck-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
   .saved-deck-name {
     font-weight: bold;
     color: #fbbf24;
-    margin-bottom: 6px;
   }
-  .saved-deck-cards {
+  .saved-deck-cards-row {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* keep on a single horizontal row; allow overflow if needed */
     gap: 6px;
+    overflow-x: auto; /* in case viewport is narrow */
+    align-items: center;
   }
-  .saved-deck-cards img {
+  .saved-deck-cards-row img {
     width: 30px;
     height: 30px;
     border: 1px solid #daa520;
     border-radius: 4px;
+    flex: 0 0 auto;
   }
+  .saved-deck-tower {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .tower-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #daa520;
+    border-radius: 6px;
+    background: #1e3a8a;
+    object-fit: contain;
+  }
+
   .delete-deck-btn {
     position: absolute;
     top: 6px;
@@ -283,6 +334,15 @@
   button[type="submit"]:disabled {
     background: #e0c97a;
     cursor: not-allowed;
+  }
+
+  select.tower-select {
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #daa520;
+    font-weight: bold;
+    color: #444;
+    background: #fff;
   }
 
   /* Drag hover highlight */
@@ -349,12 +409,26 @@
       Your Deck (8 Cards)
       <button id="clear-deck-btn" title="Clear the deck">Clear Deck</button>
     </h2>
-    <div id="deck" aria-label="Your deck slots" role="list">
-      <!-- 8 slots will be rendered here -->
+
+    <!-- deck and tower icon -->
+    <div id="deck-and-tower" aria-hidden="false">
+      <div id="deck" aria-label="Your deck slots" role="list">
+        <!-- 8 slots will be rendered here -->
+      </div>
+      <!-- Tower icon shown to the right of the deck (starts blank until chosen) -->
+      <img id="current-tower-icon" src="" alt="Selected Tower" />
     </div>
+
     <div id="average-elixir-display" aria-live="polite" aria-atomic="true"></div>
     <form id="save-form" aria-label="Save deck form">
       <input type="text" id="deck-name" placeholder="Enter deck name" maxlength="20" aria-required="true" />
+      <!-- tower select: minimal insertion, does not change existing form layout drastically -->
+      <select id="tower-select" class="tower-select" aria-label="Choose tower">
+        <option value="princess_tower">Princess Tower</option>
+        <option value="dagger_duchess">Dagger Duchess</option>
+        <option value="canoneer">Canoneer</option>
+        <option value="royal_chef">Royal Chef</option>
+      </select>
       <button type="submit" disabled>Save Deck</button>
     </form>
   </div>
@@ -381,6 +455,31 @@
 </div>
 
 <script>
+  // === TOWERS: minimal data structure for selectable tower troops ===
+  const towers = {
+    princess_tower: {
+      key: 'princess_tower',
+      name: 'Princess Tower',
+      img: 'TowerPrincessCard.webp'
+    },
+    dagger_duchess: {
+      key: 'dagger_duchess',
+      name: 'Dagger Duchess',
+      img: 'DaggerDuchessCard.webp'
+    },
+    canoneer: {
+      key: 'canoneer',
+      name: 'Canoneer',
+      img: 'CannoneerCard.webp'
+    },
+    royal_chef: {
+      key: 'royal_chef',
+      name: 'Royal Chef',
+      img: 'RoyalChefCard.webp'
+    }
+  };
+
+  // === ORIGINAL CARDS ARRAY (unchanged aside from being here) ===
   const cards = [
   { key: 'pekka', name: 'P.E.K.K.A', elixir: 7, type: 'troop', 
       img: 'PEKKACard.webp',
@@ -744,8 +843,12 @@
       stats: 'High damage ramping building.' }
   ];
 
-  // Sort cards alphabetically by name
-  cards.sort((a, b) => a.name.localeCompare(b.name));
+  // Sort cards by elixir cost instead of alphabetical (lowest elixir first).
+  // If elixir is equal, fall back to alphabetical order by name.
+  cards.sort((a, b) => {
+    if (a.elixir !== b.elixir) return a.elixir - b.elixir;
+    return a.name.localeCompare(b.name);
+  });
 
   const deckSlotsCount = 8;
   let deck = new Array(deckSlotsCount).fill(null);
@@ -768,7 +871,22 @@
   const statsPopupElixir = document.getElementById('stats-popup-elixir');
   const statsPopupCloseBtn = document.getElementById('stats-popup-close');
 
-  // Render deck slots
+  // Tower select & icon elements (minimal additions)
+  const towerSelect = document.getElementById('tower-select');
+  const currentTowerIcon = document.getElementById('current-tower-icon');
+
+  // Initialize current tower icon to selection's default on load
+  (function initTowerFromSelect() {
+    if (towerSelect && towers[towerSelect.value]) {
+      currentTowerIcon.src = towers[towerSelect.value].img;
+      currentTowerIcon.alt = towers[towerSelect.value].name;
+    } else {
+      currentTowerIcon.src = '';
+      currentTowerIcon.alt = 'Selected Tower';
+    }
+  })();
+
+  // Render deck slots (preserve original functionality exactly)
   function renderDeck() {
     deckEl.innerHTML = '';
     for (let i = 0; i < deckSlotsCount; i++) {
@@ -995,26 +1113,69 @@
       deckDiv.setAttribute('role', 'button');
       deckDiv.setAttribute('aria-label', `Load saved deck ${deckObj.name}`);
 
+      // top row: name + (cards horizontal row)
+      const topRow = document.createElement('div');
+      topRow.className = 'saved-deck-top';
+
+      const leftCol = document.createElement('div');
+      leftCol.className = 'saved-deck-left';
+
       const nameDiv = document.createElement('div');
       nameDiv.className = 'saved-deck-name';
       nameDiv.textContent = deckObj.name;
-      deckDiv.appendChild(nameDiv);
+      leftCol.appendChild(nameDiv);
 
-      const cardsDiv = document.createElement('div');
-      cardsDiv.className = 'saved-deck-cards';
-
+      const cardsRow = document.createElement('div');
+      cardsRow.className = 'saved-deck-cards-row';
+      // Ensure we put all card images in a single horizontal row for the saved deck
       deckObj.cards.forEach(cardKey => {
         const cardData = cards.find(c => c.key === cardKey);
         if (!cardData) return;
         const img = document.createElement('img');
         img.src = cardData.img;
         img.alt = cardData.name;
-        cardsDiv.appendChild(img);
+        cardsRow.appendChild(img);
       });
 
-      deckDiv.appendChild(cardsDiv);
+      leftCol.appendChild(cardsRow);
+      topRow.appendChild(leftCol);
 
-      // Pencil icon for instant delete + load deck
+      // right side of top row reserved for tower placeholder (kept minimal)
+      const rightCol = document.createElement('div');
+      rightCol.style.display = 'flex';
+      rightCol.style.alignItems = 'center';
+      rightCol.style.justifyContent = 'center';
+
+      // We do not put the tower here anymore; user requested tower below the deck,
+      // so keep the topRow compact and put tower below.
+      topRow.appendChild(rightCol);
+
+      deckDiv.appendChild(topRow);
+
+      // tower below the card row: show the specific tower troop for this saved deck
+      const towerRow = document.createElement('div');
+      towerRow.className = 'saved-deck-tower';
+      const towerLabel = document.createElement('div');
+      towerLabel.style.fontSize = '12px';
+      towerLabel.style.color = '#facc15';
+      towerLabel.style.fontWeight = 'bold';
+      towerLabel.textContent = 'Tower:';
+      towerRow.appendChild(towerLabel);
+
+      const towerImg = document.createElement('img');
+      towerImg.className = 'tower-icon';
+      if (deckObj.tower && towers[deckObj.tower]) {
+        towerImg.src = towers[deckObj.tower].img;
+        towerImg.alt = towers[deckObj.tower].name;
+      } else {
+        towerImg.src = '';
+        towerImg.alt = 'No Tower';
+      }
+      towerRow.appendChild(towerImg);
+
+      deckDiv.appendChild(towerRow);
+
+      // Pencil icon for instant delete + load deck (preserve original functionality)
       const editBtn = document.createElement('button');
       editBtn.className = 'edit-deck-btn';
       editBtn.title = 'Delete deck and load it';
@@ -1032,13 +1193,30 @@
           if (c) deck[i] = c;
         });
         deckNameInput.value = deckObj.name;
+        // restore tower selection into select and the deck-side icon
+        if (towerSelect) {
+          if (deckObj.tower && towers[deckObj.tower]) {
+            towerSelect.value = deckObj.tower;
+            currentTowerIcon.src = towers[deckObj.tower].img;
+            currentTowerIcon.alt = towers[deckObj.tower].name;
+          } else {
+            const optValue = towerSelect.value;
+            if (towers[optValue]) {
+              currentTowerIcon.src = towers[optValue].img;
+              currentTowerIcon.alt = towers[optValue].name;
+            } else {
+              currentTowerIcon.src = '';
+              currentTowerIcon.alt = 'Selected Tower';
+            }
+          }
+        }
         renderDeck();
         renderCards();
         updateSaveButton();
       });
       deckDiv.appendChild(editBtn);
 
-      // Delete button
+      // Delete button (preserve original)
       const delBtn = document.createElement('button');
       delBtn.className = 'delete-deck-btn';
       delBtn.title = 'Delete deck';
@@ -1053,7 +1231,7 @@
       });
       deckDiv.appendChild(delBtn);
 
-      // Click on saved deck loads it
+      // Click on saved deck loads it (preserve original)
       deckDiv.addEventListener('click', () => {
         deck = new Array(deckSlotsCount).fill(null);
         deckObj.cards.forEach((key, i) => {
@@ -1061,6 +1239,23 @@
           if (c) deck[i] = c;
         });
         deckNameInput.value = deckObj.name;
+        // restore tower selection into select and the deck-side icon
+        if (towerSelect) {
+          if (deckObj.tower && towers[deckObj.tower]) {
+            towerSelect.value = deckObj.tower;
+            currentTowerIcon.src = towers[deckObj.tower].img;
+            currentTowerIcon.alt = towers[deckObj.tower].name;
+          } else {
+            const optValue = towerSelect.value;
+            if (towers[optValue]) {
+              currentTowerIcon.src = towers[optValue].img;
+              currentTowerIcon.alt = towers[optValue].name;
+            } else {
+              currentTowerIcon.src = '';
+              currentTowerIcon.alt = 'Selected Tower';
+            }
+          }
+        }
         renderDeck();
         renderCards();
         updateSaveButton();
@@ -1122,9 +1317,13 @@
       return;
     }
 
+    // Minimal addition: include tower selection (value) when saving
+    const towerValue = (towerSelect && towerSelect.value) ? towerSelect.value : null;
+
     savedDecks.push({
       name: name,
-      cards: deck.map(c => c.key)
+      cards: deck.map(c => c.key),
+      tower: towerValue
     });
     saveDecksToStorage();
     renderSavedDecks();
@@ -1143,6 +1342,20 @@
   });
 
   deckNameInput.addEventListener('input', updateSaveButton);
+
+  // Update current deck-side tower icon when select changes (minimal behavior addition)
+  if (towerSelect) {
+    towerSelect.addEventListener('change', () => {
+      const val = towerSelect.value;
+      if (towers[val]) {
+        currentTowerIcon.src = towers[val].img;
+        currentTowerIcon.alt = towers[val].name;
+      } else {
+        currentTowerIcon.src = '';
+        currentTowerIcon.alt = 'Selected Tower';
+      }
+    });
+  }
 
   function init() {
     renderDeck();
