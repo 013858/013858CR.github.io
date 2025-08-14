@@ -79,11 +79,13 @@
     justify-content: center;
     position: relative;
     user-select: none;
+    padding: 4px 0;
   }
   .deck-slot img {
     max-width: 60px;
     max-height: 60px;
     pointer-events: none;
+    margin-bottom: 2px;
   }
   .deck-slot .elixir {
     position: absolute;
@@ -102,15 +104,28 @@
     font-weight: bold;
     font-size: 14px;
   }
-  /* Stat icon in deck slot */
-  .deck-slot .stats-icon {
-    position: absolute;
-    bottom: 4px;
-    right: 6px;
+
+  /* Container for deck slot and stats icon */
+  .deck-slot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  /* Stat icon below the deck slot */
+  .deck-slot-container .stats-icon {
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     color: gold;
     user-select: none;
+    text-align: center;
+    font-weight: bold;
+    background: rgba(0,0,0,0.5);
+    padding: 1px 4px;
+    border-radius: 3px;
+    width: 60px;
+    font-size: 11px;
   }
 
   /* Tower icon next to deck */
@@ -137,7 +152,7 @@
     text-align: center;
     font-weight: bold;
     font-size: 18px;
-    color: gold; /* changed color to gold */
+    color: purple; /* changed to purple to match card theme */
   }
 
   /* stacked groups vertically, cards inside group horizontally */
@@ -162,9 +177,10 @@
   }
   .card {
     display: flex;
+    flex-direction: column;
     align-items: center;
     margin: 8px 0;
-    padding: 4px 6px;
+    padding: 3px 4px;
     background: white;
     border-radius: 6px;
     box-shadow: 0 0 5px rgb(218 165 32 / 0.5);
@@ -172,6 +188,7 @@
     user-select: none;
     transition: background 0.2s ease;
     position: relative;
+    width: 65px;
   }
   .card:active {
     cursor: grabbing;
@@ -179,27 +196,62 @@
   .card:hover {
     background: #fde68a;
   }
-  .card img {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-    pointer-events: none;
-  }
-  .card .elixir {
+  .card .elixir-cost {
+    color: #c71585; /* Darker pink (MediumVioletRed) */
     font-weight: bold;
-    color: #b45309;
-    min-width: 22px;
-    text-align: center;
+    font-size: 18px;
+    margin-bottom: 2px;
+    display: block;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+  .card img {
+    width: 50px;
+    height: 50px;
+    margin: 1px 0;
+    pointer-events: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
   }
   .card .name {
-    flex: 1;
+    margin: 2px 0 0 0;
+    font-weight: bold;
+    font-size: 11px; 
+    text-align: center;
+    width: 100%;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+  }
+  .card-name-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+  }
+  .card-name-main {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-name-sub {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
   }
   .stats-icon {
     cursor: pointer;
     user-select: none;
-    margin-left: 6px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
     font-size: 16px;
     color: gold;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
   }
 
   #saved-decks-container {
@@ -479,9 +531,9 @@
     }
   };
 
-  // === ORIGINAL CARDS ARRAY (unchanged aside from being here) ===
+  // === CARDS ARRAY - Full Clash Royale card list with updated stats ===
   const cards = [
-  { key: 'pekka', name: 'P.E.K.K.A', elixir: 7, type: 'troop', 
+    { key: 'pekka', name: 'P.E.K.K.A', elixir: 7, type: 'troop', 
       img: 'PEKKACard.webp',
       stats: 'High damage tank killer.' },
     { key: 'hog_rider', name: 'Hog Rider', elixir: 4, type: 'troop', 
@@ -513,335 +565,365 @@
       stats: 'High damage ramping building.' },
     { key: 'three_musketeers', name: 'Three Musketeers', elixir: 9, type: 'troop',
       img: 'ThreeMusketeersCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Three ranged attackers.' },
     { key: 'golem', name: 'Golem', elixir: 8, type: 'troop',
       img: 'GolemCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Tank that explodes when destroyed.' },
     { key: 'lava_hound', name: 'Lava Hound', elixir: 7, type: 'troop',
       img: 'LavaHoundCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Flying tank that spawns pups when destroyed.' },
     { key: 'electro_giant', name: 'Electro Giant', elixir: 7, type: 'troop',
       img: 'electro-giant.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Summons lightning when destroyed.' },
     { key: 'mega_knight', name: 'Mega Knight', elixir: 7, type: 'troop',
       img: 'MegaKnightCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Jumps to buildings and ignores damage.' },
     { key: 'royal_recruits', name: 'Royal Recruits', elixir: 7, type: 'troop',
       img: 'RoyalRecruitsCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Multiple damage troops.' },
     { key: 'boss_bandit', name: 'Boss Bandit', elixir: 6, type: 'troop',
       img: 'boss-bandit.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Powerful melee attacker with shield.' },
     { key: 'spirit_empress', name: 'Spirit Empress', elixir: 6, type: 'troop',
       img: 'SpiritEmpressCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Summons spirits to attack.' },
     { key: 'elixir_collector', name: 'Elixir Collector', elixir: 6, type: 'building',
       img: 'ElixirCollectorCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Generates elixir over time.' },
     { key: 'sparky', name: 'Sparky', elixir: 6, type: 'troop',
       img: 'SparkyCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Charges up for massive area damage.' },
     { key: 'x-bow', name: 'X-bow', elixir: 6, type: 'building',
       img: 'X-BowCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Long-range powerful building.' },
     { key: 'elite_barbarians', name: 'Elite Barbarians', elixir: 6, type: 'troop',
       img: 'EliteBarbariansCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Strong melee attackers.' },
     { key: 'goblin_giant', name: 'Goblin Giant', elixir: 6, type: 'troop',
       img: 'GoblinGiantCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Giant with goblins on his back.' },
     { key: 'barbarian_hut', name: 'Barbarian Hut', elixir: 6, type: 'building',
       img: 'BarbarianHutCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Spawns barbarians over time.' },
     { key: 'lightning', name: 'Lightning', elixir: 6, type: 'spell',
       img: 'LightningCard.webp',
-      stats: 'High damage ramping building.' },
+      stats: 'Damages and stuns multiple units.' },
     { key: 'skelton_giant', name: 'Skeleton Giant', elixir: 6, type: 'troop',
       img: 'GiantSkeletonCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'royal_giant', name: 'Royal Giant', elixir: 6, type: 'troop',
+      stats: 'Explodes into skeletons when destroyed.' },
+    { key: 'royal_giant', name: 'Royal Giant', elixir: 6, type: 'troop',
       img: 'RoyalGiantCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'rocket', name: 'Rocket', elixir: 6, type: 'spell',
+      stats: 'Shoots three arrows with each attack.' },
+    { key: 'rocket', name: 'Rocket', elixir: 6, type: 'spell',
       img: 'RocketCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblinstein', name: 'Goblinstein', elixir: 5, type: 'troop',
+      stats: 'Massive area damage spell.' },
+    { key: 'goblinstein', name: 'Goblinstein', elixir: 5, type: 'troop',
       img: 'goblinstein.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'monk', name: 'Monk', elixir: 5, type: 'troop',
+      stats: 'Gains damage as he takes damage.' },
+    { key: 'monk', name: 'Monk', elixir: 5, type: 'troop',
       img: 'MonkCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'archer_queen', name: 'Archer Queen', elixir: 5, type: 'troop',
+      stats: 'Explodes with AoE damage when destroyed.' },
+    { key: 'archer_queen', name: 'Archer Queen', elixir: 5, type: 'troop',
       img: 'ArcherQueenCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_machine', name: 'Goblin Machine', elixir: 5, type: 'troop',
+      stats: 'Snipes the lowest health target.' },
+    { key: 'goblin_machine', name: 'Goblin Machine', elixir: 5, type: 'troop',
       img: 'GoblinMachineCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'cannon_cart', name: 'Cannon Cart', elixir: 5, type: 'troop',
+      stats: 'Shoots goblins from above.' },
+    { key: 'cannon_cart', name: 'Cannon Cart', elixir: 5, type: 'troop',
       img: 'CannonCartCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'executioner', name: 'Executioner', elixir: 5, type: 'troop',
+      stats: 'Charges toward enemy tower.' },
+    { key: 'executioner', name: 'Executioner', elixir: 5, type: 'troop',
       img: 'ExecutionerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'bowler', name: 'Bowler', elixir: 5, type: 'troop',
+      stats: 'Slow but powerful melee attacker.' },
+    { key: 'bowler', name: 'Bowler', elixir: 5, type: 'troop',
       img: 'BowlerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'rascals', name: 'Rascals', elixir: 5, type: 'troop',
+      stats: 'Rolls bombs that deal AoE damage behind units.' },
+    { key: 'rascals', name: 'Rascals', elixir: 5, type: 'troop',
       img: 'RascalsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'graveyard', name: 'Graveyard', elixir: 5, type: 'spell',
+      stats: 'Girl attacks buildings, boys attack troops.' },
+    { key: 'graveyard', name: 'Graveyard', elixir: 5, type: 'spell',
       img: 'GraveyardCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'electro_dragon', name: 'Electro Dragon', elixir: 5, type: 'troop',
+      stats: 'Spawns skeletons over time.' },
+    { key: 'electro_dragon', name: 'Electro Dragon', elixir: 5, type: 'troop',
       img: 'ElectroDragonCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'ram_rider', name: 'Ram Rider', elixir: 5, type: 'troop',
+      stats: 'Breathes lightning that stuns enemies.' },
+    { key: 'ram_rider', name: 'Ram Rider', elixir: 5, type: 'troop',
       img: 'RamRiderCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'minion_horde', name: 'Minion Horde', elixir: 5, type: 'troop',
+      stats: 'Explodes when she reaches a building.' },
+    { key: 'minion_horde', name: 'Minion Horde', elixir: 5, type: 'troop',
       img: 'MinionHordeCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'prince', name: 'Prince', elixir: 5, type: 'troop',
+      stats: 'Six flying troops.' },
+    { key: 'prince', name: 'Prince', elixir: 5, type: 'troop',
       img: 'PrinceCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'balloon', name: 'Balloon', elixir: 5, type: 'troop',
+      stats: 'Charges with increased damage when starting to move.' },
+    { key: 'balloon', name: 'Balloon', elixir: 5, type: 'troop',
       img: 'BalloonCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'royal_hogs', name: 'Royal Hogs', elixir: 5, type: 'troop',
+      stats: 'Bombs buildings and explodes when destroyed.' },
+    { key: 'royal_hogs', name: 'Royal Hogs', elixir: 5, type: 'troop',
       img: 'RoyalHogsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'witch', name: 'Witch', elixir: 5, type: 'troop',
+      stats: 'Jump over walls to attack buildings.' },
+    { key: 'witch', name: 'Witch', elixir: 5, type: 'troop',
       img: 'WitchCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'wizard', name: 'Wizard', elixir: 5, type: 'troop',
+      stats: 'Summons skeletons and deals AoE damage.' },
+    { key: 'wizard', name: 'Wizard', elixir: 5, type: 'troop',
       img: 'WizardCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'barbarians', name: 'Barbarians', elixir: 5, type: 'troop',
+      stats: 'Deals area damage with each attack.' },
+    { key: 'barbarians', name: 'Barbarians', elixir: 5, type: 'troop',
       img: 'BarbariansCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'giant', name: 'Giant', elixir: 5, type: 'troop',
+      stats: 'Multiple melee attackers.' },
+    { key: 'giant', name: 'Giant', elixir: 5, type: 'troop',
       img: 'GiantCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'mighty_miner', name: 'Mighty Miner', elixir: 4, type: 'troop',
+      stats: 'Tank that targets buildings.' },
+    { key: 'mighty_miner', name: 'Mighty Miner', elixir: 4, type: 'troop',
       img: 'MightyMinerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'golden_knight', name: 'Golden Knight', elixir: 4, type: 'troop',
+      stats: 'Tunnels underground and attacks from surprise.' },
+    { key: 'golden_knight', name: 'Golden Knight', elixir: 4, type: 'troop',
       img: 'GoldenKnightCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'skeleton_king', name: 'Skeleton King', elixir: 4, type: 'troop',
+      stats: 'Jumps to defend or attack.' },
+    { key: 'skeleton_king', name: 'Skeleton King', elixir: 4, type: 'troop',
       img: 'SkeletonKingCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'mother_witch', name: 'Mother Witch', elixir: 4, type: 'troop',
+      stats: 'Summons skeletons as he walks.' },
+    { key: 'mother_witch', name: 'Mother Witch', elixir: 4, type: 'troop',
       img: 'MotherWitchCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'night_witch', name: 'Night Witch', elixir: 4, type: 'troop',
+      stats: 'Summons bats and deals AoE damage.' },
+    { key: 'night_witch', name: 'Night Witch', elixir: 4, type: 'troop',
       img: 'NightWitchCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'lumberjack', name: 'Lumberjack', elixir: 4, type: 'troop',
+      stats: 'Summons bats and deals AoE damage.' },
+    { key: 'lumberjack', name: 'Lumberjack', elixir: 4, type: 'troop',
       img: 'LumberjackCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_drill', name: 'Goblin Drill', elixir: 4, type: 'building',
+      stats: 'Drops a rage spell when defeated.' },
+    { key: 'goblin_drill', name: 'Goblin Drill', elixir: 4, type: 'building',
       img: 'GoblinDrillCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'magic_archer', name: 'Magic Archer', elixir: 4, type: 'troop',
+      stats: 'Attacks from underground.' },
+    { key: 'magic_archer', name: 'Magic Archer', elixir: 4, type: 'troop',
       img: 'MagicArcherCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'phoenix', name: 'Phoenix', elixir: 4, type: 'troop',
+      stats: 'Shots pass through multiple enemies.' },
+    { key: 'phoenix', name: 'Phoenix', elixir: 4, type: 'troop',
       img: 'PhoenixCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_demolisher', name: 'Goblin Demolisher', elixir: 4, type: 'troop',
+      stats: 'Freezes nearby enemies when defeated, then rebirths.' },
+    { key: 'goblin_demolisher', name: 'Goblin Demolisher', elixir: 4, type: 'troop',
       img: 'GoblinDemolisherCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'inferno_dragon', name: 'Inferno Dragon', elixir: 4, type: 'troop',
+      stats: 'Moves along the arena and deals AoE damage.' },
+    { key: 'inferno_dragon', name: 'Inferno Dragon', elixir: 4, type: 'troop',
       img: 'InfernoDragonCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'hunter', name: 'Hunter', elixir: 4, type: 'troop',
+      stats: 'Damage increases the longer it attacks.' },
+    { key: 'hunter', name: 'Hunter', elixir: 4, type: 'troop',
       img: 'HunterCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'furnace', name: 'Furnace', elixir: 4, type: 'troop',
+      stats: 'Bounces between enemies with each attack.' },
+    { key: 'furnace', name: 'Furnace', elixir: 4, type: 'troop',
       img: 'FurnaceCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'zappies', name: 'Zappies', elixir: 4, type: 'troop',
+      stats: 'Spawns fire spirits over time.' },
+    { key: 'zappies', name: 'Zappies', elixir: 4, type: 'troop',
       img: 'ZappiesCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'tesla', name: 'Tesla', elixir: 4, type: 'building',
+      stats: 'Multiple lightning troops.' },
+    { key: 'tesla', name: 'Tesla', elixir: 4, type: 'building',
       img: 'TeslaCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'poison', name: 'Poison', elixir: 4, type: 'spell',
+      stats: 'Hidden building that shocks enemies.' },
+    { key: 'poison', name: 'Poison', elixir: 4, type: 'spell',
       img: 'PoisonCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'rune_giant', name: 'Rune Giant', elixir: 4, type: 'troop',
+      stats: 'Area spell that damages and weakens enemies over time.' },
+    { key: 'rune_giant', name: 'Rune Giant', elixir: 4, type: 'troop',
       img: 'RuneGiantCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'freeze', name: 'Freeze', elixir: 4, type: 'spell',
+      stats: 'Gains damage as he takes damage.' },
+    { key: 'freeze', name: 'Freeze', elixir: 4, type: 'spell',
       img: 'FreezeCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'battle_healer', name: 'Battle Healer', elixir: 4, type: 'troop',
+      stats: 'Freezes enemies in place and prevents attacking.' },
+    { key: 'battle_healer', name: 'Battle Healer', elixir: 4, type: 'troop',
       img: 'BattleHealerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'dark_prince', name: 'Dark Prince', elixir: 4, type: 'troop',
+      stats: 'Heals nearby friendly troops.' },
+    { key: 'dark_prince', name: 'Dark Prince', elixir: 4, type: 'troop',
       img: 'DarkPrinceCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'baby_dragon', name: 'Baby Dragon', elixir: 4, type: 'troop',
+      stats: 'Charges with spiked ball dealing AoE damage.' },
+    { key: 'baby_dragon', name: 'Baby Dragon', elixir: 4, type: 'troop',
       img: 'BabyDragonCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'flying_machine', name: 'Flying Machine', elixir: 4, type: 'troop',
+      stats: 'Flying troop that deals AoE damage.' },
+    { key: 'flying_machine', name: 'Flying Machine', elixir: 4, type: 'troop',
       img: 'FlyingMachineCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'mortar', name: 'Mortar', elixir: 4, type: 'building',
+      stats: 'Flying ranged attacker.' },
+    { key: 'mortar', name: 'Mortar', elixir: 4, type: 'building',
       img: 'MortarCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'bomb_tower', name: 'bomb tower', elixir: 4, type: 'building',
+      stats: 'Long-range area damage building.' },
+    { key: 'bomb_tower', name: 'bomb tower', elixir: 4, type: 'building',
       img: 'BombTowerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'skeleton_dragons', name: 'Skeleton Dragons', elixir: 4, type: 'troop',
+      stats: 'Defensive building that deals AoE damage.' },
+    { key: 'skeleton_dragons', name: 'Skeleton Dragons', elixir: 4, type: 'troop',
       img: 'SkeletonDragonsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'valkyrie', name: 'Valkyrie', elixir: 4, type: 'troop',
+      stats: 'Flying troops that deal AoE damage.' },
+    { key: 'valkyrie', name: 'Valkyrie', elixir: 4, type: 'troop',
       img: 'ValkyrieCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_cage', name: 'Goblin Cage', elixir: 4, type: 'building',
+      stats: 'Melee attacker that deals AoE damage.' },
+    { key: 'goblin_cage', name: 'Goblin Cage', elixir: 4, type: 'building',
       img: 'GoblinCageCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_hut', name: 'Goblin Hut', elixir: 4, type: 'building',
+      stats: 'Releases goblins when destroyed.' },
+    { key: 'goblin_hut', name: 'Goblin Hut', elixir: 4, type: 'building',
       img: 'GoblinHutCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'mini_pekka', name: 'Mini P.E.K.K.A', elixir: 4, type: 'troop',
+      stats: 'Spawns goblins over time.' },
+    { key: 'mini_pekka', name: 'Mini P.E.K.K.A', elixir: 4, type: 'troop',
       img: 'MiniPEKKACard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'musketeer', name: 'Musketeer', elixir: 4, type: 'troop',
+      stats: 'Fast, high-damage melee attacker.' },
+    { key: 'musketeer', name: 'Musketeer', elixir: 4, type: 'troop',
       img: 'MusketeerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'little_prince', name: 'Little Prince', elixir: 3, type: 'troop',
+      stats: 'Ranged attacker with high damage.' },
+    { key: 'little_prince', name: 'Little Prince', elixir: 3, type: 'troop',
       img: 'LittlePrinceCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'fishermen', name: 'Fishermen', elixir: 3, type: 'troop',
+      stats: 'Leaves a trail of damage and drops a crown.' },
+    { key: 'fishermen', name: 'Fishermen', elixir: 3, type: 'troop',
       img: 'FishermanCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'void', name: 'Void', elixir: 3, type: 'spell',
+      stats: 'Pulls enemy troops closer with his fishing rod.' },
+    { key: 'void', name: 'Void', elixir: 3, type: 'spell',
       img: 'VoidCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'clone', name: 'Clone', elixir: 3, type: 'spell',
+      stats: 'Pulls back enemy troops and damages them.' },
+    { key: 'clone', name: 'Clone', elixir: 3, type: 'spell',
       img: 'CloneCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'tornado', name: 'Tornado', elixir: 3, type: 'spell',
+      stats: 'Creates copies of troops in the target area.' },
+    { key: 'tornado', name: 'Tornado', elixir: 3, type: 'spell',
       img: 'TornadoCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'elixir_golem', name: 'Elixir Golem', elixir: 3, type: 'troop',
+      stats: 'Pulls in enemy troops and deals damage.' },
+    { key: 'elixir_golem', name: 'Elixir Golem', elixir: 3, type: 'troop',
       img: 'ElixirGolemCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'royal_delivery', name: 'Royal Delivery', elixir: 3, type: 'spell',
+      stats: 'Splits into smaller golems when destroyed, generates elixir.' },
+    { key: 'royal_delivery', name: 'Royal Delivery', elixir: 3, type: 'spell',
       img: 'RoyalDeliveryCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'royal_ghost', name: 'Royal Ghost', elixir: 3, type: 'troop',
+      stats: 'Drops a barrel that explodes and releases troops.' },
+    { key: 'royal_ghost', name: 'Royal Ghost', elixir: 3, type: 'troop',
       img: 'RoyalGhostCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'ice_wizard', name: 'Ice Wizard', elixir: 3, type: 'troop',
+      stats: 'Invisible when not attacking, deals damage over time.' },
+    { key: 'ice_wizard', name: 'Ice Wizard', elixir: 3, type: 'troop',
       img: 'IceWizardCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'earthquake', name: 'Earthquake', elixir: 3, type: 'spell',
+      stats: 'Freezes enemies in a small area around him.' },
+    { key: 'earthquake', name: 'Earthquake', elixir: 3, type: 'spell',
       img: 'EarthquakeCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'firecracker', name: 'Firecracker', elixir: 3, type: 'troop',
+      stats: 'Damages buildings and knocks back troops.' },
+    { key: 'firecracker', name: 'Firecracker', elixir: 3, type: 'troop',
       img: 'FirecrackerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'miner', name: 'Miner', elixir: 3, type: 'troop',
+      stats: 'Jumps to the nearest building and explodes.' },
+    { key: 'miner', name: 'Miner', elixir: 3, type: 'troop',
       img: 'MinerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'princess', name: 'Princess', elixir: 3, type: 'troop',
+      stats: 'Tunnels underground to attack from surprise.' },
+    { key: 'princess', name: 'Princess', elixir: 3, type: 'troop',
       img: 'PrincessCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'dart_goblin', name: 'Dart Goggins', elixir: 3, type: 'troop',
+      stats: 'Long-range attacker that deals AoE damage.' },
+    { key: 'dart_goblin', name: 'Dart Gobbins', elixir: 3, type: 'troop',
       img: 'DartGoblinCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'skeleton_barrel', name: 'Skeleton Barrel', elixir: 3, type: 'troop',
+      stats: 'Throws darts that pass through multiple enemies.' },
+    { key: 'skeleton_barrel', name: 'Skeleton Barrel', elixir: 3, type: 'troop',
       img: 'SkeletonBarrelCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_gang', name: 'Goblin Gang', elixir: 3, type: 'troop',
+      stats: 'Rolls to a building and explodes into skeletons.' },
+    { key: 'goblin_gang', name: 'Goblin Gang', elixir: 3, type: 'troop',
       img: 'GoblinGangCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_barrel', name: 'Goblin Barrel', elixir: 3, type: 'spell',
+      stats: 'Three goblins appear when played.' },
+    { key: 'goblin_barrel', name: 'Goblin Barrel', elixir: 3, type: 'spell',
       img: 'GoblinBarrelCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'guards', name: 'Guards', elixir: 3, type: 'troop',
+      stats: 'Rolls to a building and explodes into goblins.' },
+    { key: 'guards', name: 'Guards', elixir: 3, type: 'troop',
       img: 'GuardsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'skeleton_army', name: 'Skeleton Army', elixir: 3, type: 'troop',
+      stats: 'Three armored troops with shields.' },
+    { key: 'skeleton_army', name: 'Skeleton Army', elixir: 3, type: 'troop',
       img: 'SkeletonArmyCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'tombstone', name: 'Tombstone', elixir: 3, type: 'building',
+      stats: 'Multiple weak melee attackers.' },
+    { key: 'tombstone', name: 'Tombstone', elixir: 3, type: 'building',
       img: 'TombstoneCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'arrows', name: 'Arrows', elixir: 3, type: 'spell',
+      stats: 'Defensive building that spawns skeletons.' },
+    { key: 'arrows', name: 'Arrows', elixir: 3, type: 'spell',
       img: 'ArrowsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'minions', name: 'Minions', elixir: 3, type: 'troop',
+      stats: 'Shoots arrows at multiple enemies.' },
+    { key: 'minions', name: 'Minions', elixir: 3, type: 'troop',
       img: 'MinionsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'archers', name: 'Archers', elixir: 3, type: 'troop',
+      stats: 'Flying troops with moderate damage.' },
+    { key: 'archers', name: 'Archers', elixir: 3, type: 'troop',
       img: 'ArchersCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblin_curse', name: 'Goblin Curse', elixir: 2, type: 'spell',
+      stats: 'Ranged attackers with moderate damage.' },
+    { key: 'goblin_curse', name: 'Goblin Curse', elixir: 2, type: 'spell',
       img: 'GoblinCurseCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'rage', name: 'Rage', elixir: 2, type: 'spell',
+      stats: 'Curses an area, turning troops into weak goblins.' },
+    { key: 'rage', name: 'Rage', elixir: 2, type: 'spell',
       img: 'RageCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'suspicious_bush', name: 'Suspicious Bush', elixir: 2, type: 'troop',
+      stats: 'Increases movement and attack speed in an area.' },
+    { key: 'suspicious_bush', name: 'Suspicious Bush', elixir: 2, type: 'troop',
       img: 'SuspiciousBushCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'wall_breakers', name: 'Wall Breakers', elixir: 2, type: 'troop',
+      stats: 'Troop hidden in a bush, surprises enemies.' },
+    { key: 'wall_breakers', name: 'Wall Breakers', elixir: 2, type: 'troop',
       img: 'WallBreakersCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'log', name: 'Log', elixir: 2, type: 'spell',
+      stats: 'Suicide units that destroy buildings quickly.' },
+    { key: 'log', name: 'Log', elixir: 2, type: 'spell',
       img: 'TheLogCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'barbarian_barrel', name: 'Barbarian Barrel', elixir: 2, type: 'spell',
+      stats: 'Rolls across the arena, damaging and knocking back troops.' },
+    { key: 'barbarian_barrel', name: 'Barbarian Barrel', elixir: 2, type: 'troop',
       img: 'BarbarianBarrelCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'beserker', name: 'Beserker', elixir: 2, type: 'troop',
+      stats: 'Rolls to a building and explodes into barbarians.' },
+    { key: 'beserker', name: 'Beserker', elixir: 2, type: 'troop',
       img: 'BerserkerCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'ice_golem', name: 'Ice Golem', elixir: 2, type: 'troop',
+      stats: 'Fast melee attacker that gains rage.' },
+    { key: 'ice_golem', name: 'Ice Golem', elixir: 2, type: 'troop',
       img: 'IceGolemCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'snowball', name: 'Snowball', elixir: 2, type: 'spell',
+      stats: 'Slows nearby enemies and explodes into ice spirits when destroyed.' },
+    { key: 'snowball', name: 'Snowball', elixir: 2, type: 'spell',
       img: 'GiantSnowballCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'bats', name: 'Bats', elixir: 2, type: 'troop',
+      stats: 'Knocks back and damages troops, leaves a freeze trail.' },
+    { key: 'bats', name: 'Bats', elixir: 2, type: 'troop',
       img: 'BatsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'bomber', name: 'Bomber', elixir: 2, type: 'troop',
+      stats: 'Fast flying troops with low hitpoints.' },
+    { key: 'bomber', name: 'Bomber', elixir: 2, type: 'troop',
       img: 'BomberCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'spear_goblins', name: 'Spear Goblins', elixir: 2, type: 'troop',
+      stats: 'Throws bombs at troops.' },
+    { key: 'spear_goblins', name: 'Spear Goblins', elixir: 2, type: 'troop',
       img: 'SpearGoblinsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'goblins', name: 'Goblins', elixir: 2, type: 'troop',
+      stats: 'Ranged goblins with moderate damage.' },
+    { key: 'goblins', name: 'Goblins', elixir: 2, type: 'troop',
       img: 'GoblinsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'mirror', name: 'Mirror', elixir: 0, type: 'spell',
+      stats: 'Fast melee attackers with low hitpoints.' },
+    { key: 'mirror', name: 'Mirror', elixir: 0, type: 'spell',
       img: 'wC6Cm9rKLEOk72zTsukVwxewKIoO4ZcMJun54zCPWvA.png',
-      stats: 'High damage ramping building.' },
-      { key: 'heal_spirit', name: 'Heal Spirit', elixir: 1, type: 'troop',
+      stats: 'Creates a copy of a spell in your deck.' },
+    { key: 'heal_spirit', name: 'Heal Spirit', elixir: 1, type: 'troop',
       img: 'HealSpiritCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'ice_spirit', name: 'Ice Spirit', elixir: 1, type: 'troop',
+      stats: 'Heals friendly troops in her path.' },
+    { key: 'ice_spirit', name: 'Ice Spirit', elixir: 1, type: 'troop',
       img: 'IceSpiritCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'electro_spirit', name: 'Electro Spirit', elixir: 1, type: 'troop',
+      stats: 'Freezes nearby enemies when destroyed.' },
+    { key: 'electro_spirit', name: 'Electro Spirit', elixir: 1, type: 'troop',
       img: 'ElectroSpiritCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'fire_spirit', name: 'Fire Spirit', elixir: 1, type: 'troop',
+      stats: 'Stuns nearby enemies when destroyed.' },
+    { key: 'fire_spirit', name: 'Fire Spirit', elixir: 1, type: 'troop',
       img: 'FireSpiritsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'skeletons', name: 'Skeletons', elixir: 1, type: 'troop',
+      stats: 'Damages and knocks back enemies in her path.' },
+    { key: 'skeletons', name: 'Skeletons', elixir: 1, type: 'troop',
       img: 'SkeletonsCard.webp',
-      stats: 'High damage ramping building.' },
-      { key: 'knight', name: 'Knight', elixir: 3, type: 'troop',
+      stats: 'Fast melee attackers with low hitpoints.' },
+    { key: 'knight', name: 'Knight', elixir: 3, type: 'troop',
       img: 'KnightCard.webp',
-      stats: 'High damage ramping building.' }
+      stats: 'Basic melee troop with moderate damage.' }
   ];
+
+  // Format long names to split them if they exceed 9 characters
+  function formatCardName(name) {
+    // If name is 9 characters or less, keep it as is
+    if (name.length <= 9) {
+      return {
+        main: name,
+        sub: ''
+      };
+    }
+    
+    // For longer names, split into two parts
+    // Try to split at natural word boundaries first
+    if (name.includes(' ')) {
+      const parts = name.split(' ');
+      if (parts.length === 2) {
+        return {
+          main: parts[0],
+          sub: parts[1]
+        };
+      }
+    }
+    
+    // If no space, split in half
+    const midPoint = Math.ceil(name.length / 2);
+    return {
+      main: name.substring(0, midPoint),
+      sub: name.substring(midPoint)
+    };
+  }
 
   // Sort cards by elixir cost instead of alphabetical (lowest elixir first).
   // If elixir is equal, fall back to alphabetical order by name.
@@ -890,6 +972,10 @@
   function renderDeck() {
     deckEl.innerHTML = '';
     for (let i = 0; i < deckSlotsCount; i++) {
+      // Create a container for the slot and stats icon
+      const container = document.createElement('div');
+      container.className = 'deck-slot-container';
+      
       const slot = document.createElement('div');
       slot.classList.add('deck-slot');
       if (i < 2) slot.classList.add('first-two'); // gradient border for first 2 slots
@@ -907,17 +993,6 @@
         elixirBadge.classList.add('elixir');
         elixirBadge.textContent = card.elixir;
         slot.appendChild(elixirBadge);
-
-        // Add stat icon (crown)
-        const statIcon = document.createElement('span');
-        statIcon.className = 'stats-icon';
-        statIcon.innerHTML = '&#x1F451;'; // crown emoji
-        statIcon.title = 'View stats';
-        statIcon.addEventListener('click', e => {
-          e.stopPropagation();
-          openStatsPopup(card);
-        });
-        slot.appendChild(statIcon);
       }
 
       slot.dataset.index = i;
@@ -984,7 +1059,22 @@
         slot.classList.remove('dragging');
       });
 
-      deckEl.appendChild(slot);
+      container.appendChild(slot);
+      
+      // Add stats icon below the slot if there's a card
+      if (deck[i]) {
+        const statIcon = document.createElement('span');
+        statIcon.className = 'stats-icon';
+        statIcon.innerHTML = 'Stats';
+        statIcon.title = 'View stats';
+        statIcon.addEventListener('click', e => {
+          e.stopPropagation();
+          openStatsPopup(deck[i]);
+        });
+        container.appendChild(statIcon);
+      }
+
+      deckEl.appendChild(container);
     }
     updateAverageElixir();
   }
@@ -1011,20 +1101,37 @@
         cardDiv.className = 'card';
         cardDiv.draggable = true;
 
+        // Elixir cost (darker pink, above the card)
+        const elixirSpan = document.createElement('span');
+        elixirSpan.className = 'elixir-cost';
+        elixirSpan.textContent = card.elixir;
+        cardDiv.appendChild(elixirSpan);
+
         const img = document.createElement('img');
         img.src = card.img;
         img.alt = card.name;
         cardDiv.appendChild(img);
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'name';
-        nameSpan.textContent = card.name;
-        cardDiv.appendChild(nameSpan);
-
-        const elixirSpan = document.createElement('span');
-        elixirSpan.className = 'elixir';
-        elixirSpan.textContent = card.elixir;
-        cardDiv.appendChild(elixirSpan);
+        // Card name (below the card)
+        const nameContainer = document.createElement('div');
+        nameContainer.className = 'card-name-container';
+        
+        const nameMain = document.createElement('div');
+        nameMain.className = 'card-name-main';
+        
+        const nameSub = document.createElement('div');
+        nameSub.className = 'card-name-sub';
+        
+        const formattedName = formatCardName(card.name);
+        nameMain.textContent = formattedName.main;
+        nameSub.textContent = formattedName.sub;
+        
+        nameContainer.appendChild(nameMain);
+        if (formattedName.sub) {
+          nameContainer.appendChild(nameSub);
+        }
+        
+        cardDiv.appendChild(nameContainer);
 
         // Stat sheet icon (crown)
         const statIcon = document.createElement('span');
