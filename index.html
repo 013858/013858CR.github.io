@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Clash Royale Deck Creator - Smart Suggestions</title>
+<title>Clash Royale Deck Creator - Drag & Drop + Stats Popup</title>
 <style>
   html, body {
     height: 100%;
@@ -22,82 +22,6 @@
     flex-direction: column;
     padding: 15px 20px;
     overflow-y: auto;
-  }
-  /* Moved suggestions section to the top */
-  #suggested-cards-section {
-    margin-bottom: 15px;
-    padding: 10px;
-    background: #1e3a8a;
-    border-radius: 8px;
-    border: 2px solid #daa520;
-  }
-  #suggested-cards-section h3 {
-    color: #facc15;
-    margin: 0 0 10px 0;
-    font-size: 16px;
-  }
-  #suggested-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .suggestion-category {
-    margin-bottom: 15px;
-  }
-  .category-header {
-    font-weight: bold;
-    color: #facc15;
-    margin-bottom: 8px;
-    font-size: 14px;
-    border-bottom: 1px solid #daa520;
-    padding-bottom: 4px;
-  }
-  .suggestion-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
-  .suggestion-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 12px;
-    color: #facc15;
-    text-align: center;
-  }
-  .suggestion-item .card {
-    width: 50px;
-    height: 70px;
-    border: 2px solid rgba(218, 165, 32, 0.5);
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: relative;
-    background: #1e3a8a;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
-  }
-  .suggestion-item .card:hover {
-    opacity: 0.9;
-  }
-  .suggestion-item .card img {
-    width: 35px;
-    height: 35px;
-    pointer-events: none;
-  }
-  .suggestion-item .card .elixir {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: gold;
-    border-radius: 50%;
-    padding: 1px 4px;
-    font-weight: bold;
-    color: #222;
-    font-size: 10px;
   }
   #deck-container {
     border-bottom: 2px solid #daa520;
@@ -155,13 +79,11 @@
     justify-content: center;
     position: relative;
     user-select: none;
-    padding: 4px 0;
   }
   .deck-slot img {
     max-width: 60px;
     max-height: 60px;
     pointer-events: none;
-    margin-bottom: 2px;
   }
   .deck-slot .elixir {
     position: absolute;
@@ -180,42 +102,15 @@
     font-weight: bold;
     font-size: 14px;
   }
-  /* Container for deck slot and stats icon */
-  .deck-slot-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-  /* Stat icon below the deck slot */
-  .deck-slot-container .stats-icon {
+  /* Stat icon in deck slot */
+  .deck-slot .stats-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     color: gold;
     user-select: none;
-    text-align: center;
-    font-weight: bold;
-    background: rgba(0,0,0,0.5);
-    padding: 1px 4px;
-    border-radius: 3px;
-    width: 60px;
-    font-size: 11px;
-  }
-  /* Suggested card in deck slot */
-  .deck-slot.suggested {
-    opacity: 0.7;
-    border-color: rgba(218, 165, 32, 0.7);
-  }
-  .deck-slot.suggested::after {
-    content: "Suggested";
-    position: absolute;
-    bottom: 2px;
-    left: 2px;
-    font-size: 8px;
-    color: gold;
-    background: rgba(0,0,0,0.7);
-    padding: 1px 3px;
-    border-radius: 3px;
   }
   /* Tower icon next to deck */
   #deck-and-tower {
@@ -240,141 +135,21 @@
     text-align: center;
     font-weight: bold;
     font-size: 18px;
-    color: purple; /* changed to purple to match card theme */
+    color: gold; /* changed color to gold */
   }
-  /* Focus card section */
-  #focus-card-section {
-    margin-top: 15px;
-    padding: 10px;
-    background: #1e3a8a;
-    border-radius: 8px;
-    border: 2px solid #daa520;
-  }
-  #focus-card-section h3 {
-    color: #facc15;
-    margin: 0 0 10px 0;
-    font-size: 16px;
-  }
-  #focus-card-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 150px;
-    overflow-y: auto;
-  }
-  .focus-card {
-    width: 50px;
-    height: 70px;
-    border: 2px solid #daa520;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: relative;
-    background: #1e3a8a;
-  }
-  .focus-card.selected {
-    border-color: gold;
-    box-shadow: 0 0 8px gold;
-  }
-  .focus-card img {
-    width: 35px;
-    height: 35px;
-    pointer-events: none;
-  }
-  .focus-card .elixir {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: gold;
-    border-radius: 50%;
-    padding: 1px 4px;
-    font-weight: bold;
-    color: #222;
-    font-size: 10px;
-  }
-  /* Reasoning section for deck choices */
-  #reasoning-section {
-    margin-top: 15px;
-    padding: 10px;
-    background: #1e3a8a;
-    border-radius: 8px;
-    border: 2px solid #daa520;
-  }
-  #reasoning-section h3 {
-    color: #facc15;
-    margin: 0 0 10px 0;
-    font-size: 16px;
-  }
-  #reasoning-text {
-    color: #facc15;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-  /* Deck rating section - only show when deck is complete */
-  #deck-rating-section {
-    margin-top: 15px;
-    padding: 10px;
-    background: #1e3a8a;
-    border-radius: 8px;
-    border: 2px solid #daa520;
-    display: none; /* Hidden by default, shown when deck is complete */
-  }
-  #deck-rating-section h3 {
-    color: #facc15;
-    margin: 0 0 10px 0;
-    font-size: 16px;
-    text-align: center;
-  }
-  .rating-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .rating-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .rating-label {
-    width: 100px;
-    font-weight: bold;
-    color: #facc15;
-  }
-  .rating-bar {
-    flex: 1;
-    height: 15px;
-    background: #1e3a8a;
-    border: 1px solid #daa520;
-    border-radius: 7px;
-    overflow: hidden;
-  }
-  .rating-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
-  }
-  .rating-score {
-    width: 40px;
-    text-align: center;
-    font-weight: bold;
-    color: gold;
-  }
-  /* Updated cards list - all cards in a single list ordered by elixir cost */
+  /* Removed card-group styling and adjusted cards-list */
   #cards-list {
-    margin-top: 15px;
+    margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center;
   }
+  /* Combined card style from card-group and card */
   .card {
     display: flex;
-    flex-direction: column;
     align-items: center;
     margin: 8px 0;
-    padding: 3px 4px;
+    padding: 4px 6px;
     background: white;
     border-radius: 6px;
     box-shadow: 0 0 5px rgb(218 165 32 / 0.5);
@@ -382,7 +157,7 @@
     user-select: none;
     transition: background 0.2s ease;
     position: relative;
-    width: 65px;
+    min-width: 18px;
   }
   .card:active {
     cursor: grabbing;
@@ -390,62 +165,27 @@
   .card:hover {
     background: #fde68a;
   }
-  .card .elixir-cost {
-    color: #c71585; /* Darker pink (MediumVioletRed) */
-    font-weight: bold;
-    font-size: 18px;
-    margin-bottom: 2px;
-    display: block;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  }
   .card img {
-    width: 50px;
-    height: 50px;
-    margin: 1px 0;
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
     pointer-events: none;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  }
+  .card .elixir {
+    font-weight: bold;
+    color: #b45309;
+    min-width: 22px;
+    text-align: center;
   }
   .card .name {
-    margin: 2px 0 0 0;
-    font-weight: bold;
-    font-size: 8px;
-    text-align: center;
-    width: 100%;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
-  }
-  .card-name-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    text-align: center;
-  }
-  .card-name-main {
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .card-name-sub {
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
+    flex: 1;
   }
   .stats-icon {
     cursor: pointer;
     user-select: none;
-    position: absolute;
-    top: 2px;
-    right: 2px;
+    margin-left: 6px;
     font-size: 16px;
     color: gold;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
   }
   #saved-decks-container {
     width: 320px;
@@ -643,13 +383,6 @@
 </head>
 <body>
 <div id="main">
-  <!-- Moved suggestions section to the top -->
-  <div id="suggested-cards-section">
-    <h3>Suggestions</h3>
-    <div id="suggested-cards">
-      <!-- Suggested cards will be rendered here -->
-    </div>
-  </div>
   <div id="deck-container">
     <h2>
       Your Deck (8 Cards)
@@ -675,63 +408,9 @@
       </select>
       <button type="submit" disabled>Save Deck</button>
     </form>
-    <!-- Focus card section -->
-    <div id="focus-card-section">
-      <h3>Focus Card</h3>
-      <div id="focus-card-list">
-        <!-- Focus cards will be rendered here -->
-      </div>
-    </div>
-    <!-- Reasoning section for deck choices -->
-    <div id="reasoning-section">
-      <h3>Deck Strategy</h3>
-      <div id="reasoning-text">Select a focus card to see deck recommendations and strategy.</div>
-    </div>
-    <!-- Deck rating section - only shown when deck is complete -->
-    <div id="deck-rating-section">
-      <h3>Deck Analysis</h3>
-      <div class="rating-container">
-        <div class="rating-item">
-          <div class="rating-label">Offense</div>
-          <div class="rating-bar">
-            <div id="offense-fill" class="rating-fill" style="width: 0%"></div>
-          </div>
-          <div id="offense-score" class="rating-score">0</div>
-        </div>
-        <div class="rating-item">
-          <div class="rating-label">Defense</div>
-          <div class="rating-bar">
-            <div id="defense-fill" class="rating-fill" style="width: 0%"></div>
-          </div>
-          <div id="defense-score" class="rating-score">0</div>
-        </div>
-        <div class="rating-item">
-          <div class="rating-label">Synergy</div>
-          <div class="rating-bar">
-            <div id="synergy-fill" class="rating-fill" style="width: 0%"></div>
-          </div>
-          <div id="synergy-score" class="rating-score">0</div>
-        </div>
-        <div class="rating-item">
-          <div class="rating-label">F2P Score</div>
-          <div class="rating-bar">
-            <div id="f2p-fill" class="rating-fill" style="width: 0%"></div>
-          </div>
-          <div id="f2p-score" class="rating-score">0</div>
-        </div>
-        <div class="rating-item">
-          <div class="rating-label">Versatility</div>
-          <div class="rating-bar">
-            <div id="versatility-fill" class="rating-fill" style="width: 0%"></div>
-          </div>
-          <div id="versatility-score" class="rating-score">0</div>
-        </div>
-      </div>
-    </div>
   </div>
-  <!-- Updated cards list - all cards in a single list ordered by elixir cost -->
   <div id="cards-list" aria-label="Available cards">
-    <!-- All cards will be rendered here in order of elixir cost -->
+    <!-- cards will be rendered here in a single list -->
   </div>
 </div>
 <div id="saved-decks-container" aria-live="polite" aria-atomic="true">
@@ -772,826 +451,386 @@
       img: 'RoyalChefCard.webp'
     }
   };
-  
-  // === CARDS ARRAY - All cards including high elixir ones with categories and champion status ===
+  // === ORIGINAL CARDS ARRAY (unchanged aside from being here) ===
   const cards = [
-    { key: 'pekka', name: 'P.E.K.K.A', elixir: 7, type: 'troop', 
+  { key: 'pekka', name: 'P.E.K.K.A', elixir: 7, type: 'troop', 
       img: 'PEKKACard.webp',
-      stats: 'High damage tank killer.',
-      categories: ['tank_killer', 'mini_tank', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage tank killer.' },
     { key: 'hog_rider', name: 'Hog Rider', elixir: 4, type: 'troop', 
       img: 'HogRiderCard.webp',
-      stats: 'Fast building attacker.',
-      categories: ['win_condition', 'cycle', 'ground'],
-      isChampion: false
-    },
+      stats: 'Fast building attacker.' },
     { key: 'bandit', name: 'Bandit', elixir: 3, type: 'troop',
       img: 'BanditCard.webp',
-      stats: 'Dash damage troop.',
-      categories: ['mini_tank', 'damage', 'ground'],
-      isChampion: false
-    },
+      stats: 'Dash damage troop.' },
     { key: 'battle_ram', name: 'Battle Ram', elixir: 4, type: 'troop',
       img: 'BattleRamCard.webp',
-      stats: 'Charge to buildings.',
-      categories: ['win_condition', 'ground'],
-      isChampion: false
-    },
+      stats: 'Charge to buildings.' },
     { key: 'electro_wizard', name: 'Electro Wizard', elixir: 4, type: 'troop',
       img: 'ElectroWizardCard.webp',
-      stats: 'Stuns on spawn and attack.',
-      categories: ['spell_damage', 'aoe', 'damage', 'air_ground'],
-      isChampion: false
-    },
+      stats: 'Stuns on spawn and attack.' },
     { key: 'cannon', name: 'Cannon', elixir: 3, type: 'building',
       img: 'CannonCard.webp',
-      stats: 'Cheap defensive building.',
-      categories: ['defense', 'building'],
-      isChampion: false
-    },
+      stats: 'Cheap defensive building.' },
     { key: 'fireball', name: 'Fireball', elixir: 4, type: 'spell',
       img: 'FireballCard.webp',
-      stats: 'Area damage spell.',
-      categories: ['spell_damage', 'aoe', 'damage'],
-      isChampion: false
-    },
+      stats: 'Area damage spell.' },
     { key: 'zap', name: 'Zap', elixir: 2, type: 'spell',
       img: 'ZapCard.webp',
-      stats: 'Stuns and damages small area.',
-      categories: ['spell_damage', 'anti_air', 'cycle'],
-      isChampion: false
-    },
+      stats: 'Stuns and damages small area.' },
     { key: 'mega_minion', name: 'Mega Minion', elixir: 3, type: 'troop',
       img: 'MegaMinionCard.webp',
-      stats: 'Flying, medium damage troop.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
+      stats: 'Flying, medium damage troop.' },
     { key: 'inferno_tower', name: 'Inferno Tower', elixir: 5, type: 'building',
       img: 'InfernoTowerCard-removebg-preview.png',
-      stats: 'High damage ramping building.',
-      categories: ['defense', 'building', 'tank_killer'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'three_musketeers', name: 'Three Musketeers', elixir: 9, type: 'troop',
       img: 'ThreeMusketeersCard.webp',
-      stats: 'Three ranged attackers.',
-      categories: ['aoe', 'damage', 'air_ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'golem', name: 'Golem', elixir: 8, type: 'troop',
       img: 'GolemCard.webp',
-      stats: 'Tank that explodes on death.',
-      categories: ['win_condition', 'tank', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'lava_hound', name: 'Lava Hound', elixir: 7, type: 'troop',
       img: 'LavaHoundCard.webp',
-      stats: 'Air tank that spawns pups.',
-      categories: ['win_condition', 'tank', 'air'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'electro_giant', name: 'Electro Giant', elixir: 7, type: 'troop',
       img: 'electro-giant.webp',
-      stats: 'Giant that damages nearby enemies.',
-      categories: ['win_condition', 'tank', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'mega_knight', name: 'Mega Knight', elixir: 7, type: 'troop',
       img: 'MegaKnightCard.webp',
-      stats: 'Jumps to enemies and deals damage.',
-      categories: ['tank_killer', 'mini_tank', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'royal_recruits', name: 'Royal Recruits', elixir: 7, type: 'troop',
       img: 'RoyalRecruitsCard.webp',
-      stats: 'Multiple troops with life steal.',
-      categories: ['win_condition', 'push', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'boss_bandit', name: 'Boss Bandit', elixir: 6, type: 'troop',
       img: 'boss-bandit.webp',
-      stats: 'Powerful bandit with high damage.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'spirit_empress', name: 'Spirit Empress', elixir: 6, type: 'troop',
       img: 'SpiritEmpressCard.webp',
-      stats: 'Ranged damage with spirit minions.',
-      categories: ['damage', 'air_ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'elixir_collector', name: 'Elixir Collector', elixir: 6, type: 'building',
       img: 'ElixirCollectorCard.webp',
-      stats: 'Generates elixir over time.',
-      categories: ['utility', 'building'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'sparky', name: 'Sparky', elixir: 6, type: 'troop',
       img: 'SparkyCard.webp',
-      stats: 'High damage on full charge.',
-      categories: ['win_condition', 'aoe', 'damage'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'x-bow', name: 'X-bow', elixir: 6, type: 'building',
       img: 'X-BowCard.webp',
-      stats: 'Long-range building.',
-      categories: ['defense', 'building', 'damage'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'elite_barbarians', name: 'Elite Barbarians', elixir: 6, type: 'troop',
       img: 'EliteBarbariansCard.webp',
-      stats: 'Strong barbarian duo.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'goblin_giant', name: 'Goblin Giant', elixir: 6, type: 'troop',
       img: 'GoblinGiantCard.webp',
-      stats: 'Giant with goblins on its back.',
-      categories: ['win_condition', 'tank', 'ground'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'barbarian_hut', name: 'Barbarian Hut', elixir: 6, type: 'building',
       img: 'BarbarianHutCard.webp',
-      stats: 'Spawns barbarians over time.',
-      categories: ['utility', 'building'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'lightning', name: 'Lightning', elixir: 6, type: 'spell',
       img: 'LightningCard.webp',
-      stats: 'Damages and stuns multiple units.',
-      categories: ['spell_damage', 'aoe'],
-      isChampion: false
-    },
+      stats: 'High damage ramping building.' },
     { key: 'skelton_giant', name: 'Skeleton Giant', elixir: 6, type: 'troop',
       img: 'GiantSkeletonCard.webp',
-      stats: 'Explodes into skeletons on death.',
-      categories: ['win_condition', 'push', 'ground'],
-      isChampion: false
-    },
-    { key: 'royal_giant', name: 'Royal Giant', elixir: 6, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'royal_giant', name: 'Royal Giant', elixir: 6, type: 'troop',
       img: 'RoyalGiantCard.webp',
-      stats: 'Shoots three arrows at buildings.',
-      categories: ['win_condition', 'damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'rocket', name: 'Rocket', elixir: 6, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'rocket', name: 'Rocket', elixir: 6, type: 'spell',
       img: 'RocketCard.webp',
-      stats: 'High damage area spell.',
-      categories: ['spell_damage', 'aoe'],
-      isChampion: false
-    },
-    { key: 'goblinstein', name: 'Goblinstein', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'goblinstein', name: 'Goblinstein', elixir: 5, type: 'troop',
       img: 'goblinstein.webp',
-      stats: 'Goblin with a powerful hammer.',
-      categories: ['win_condition', 'champion', 'push'],
-      isChampion: true
-    },
-    { key: 'monk', name: 'Monk', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'monk', name: 'Monk', elixir: 5, type: 'troop',
       img: 'MonkCard.webp',
-      stats: 'Heals nearby friendly units.',
-      categories: ['support', 'healer', 'ground'],
-      isChampion: false
-    },
-    { key: 'archer_queen', name: 'Archer Queen', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'archer_queen', name: 'Archer Queen', elixir: 5, type: 'troop',
       img: 'ArcherQueenCard.webp',
-      stats: 'Ranged damage with night vision.',
-      categories: ['damage', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'goblin_machine', name: 'Goblin Machine', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_machine', name: 'Goblin Machine', elixir: 5, type: 'troop',
       img: 'GoblinMachineCard.webp',
-      stats: 'Flying goblin vehicle.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'cannon_cart', name: 'Cannon Cart', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'cannon_cart', name: 'Cannon Cart', elixir: 5, type: 'troop',
       img: 'CannonCartCard.webp',
-      stats: 'Rolling cannon that deals damage.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'executioner', name: 'Executioner', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'executioner', name: 'Executioner', elixir: 5, type: 'troop',
       img: 'ExecutionerCard.webp',
-      stats: 'Slow melee unit with wide swing.',
-      categories: ['tank_killer', 'aoe', 'ground'],
-      isChampion: false
-    },
-    { key: 'bowler', name: 'Bowler', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'bowler', name: 'Bowler', elixir: 5, type: 'troop',
       img: 'BowlerCard.webp',
-      stats: 'Rolls bombs that deal splash damage.',
-      categories: ['aoe', 'damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'rascals', name: 'Rascals', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'rascals', name: 'Rascals', elixir: 5, type: 'troop',
       img: 'RascalsCard.webp',
-      stats: 'Girl with deck shield and boys.',
-      categories: ['push', 'damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'graveyard', name: 'Graveyard', elixir: 5, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'graveyard', name: 'Graveyard', elixir: 5, type: 'spell',
       img: 'GraveyardCard.webp',
-      stats: 'Spawns skeletons over time.',
-      categories: ['spell_summon', 'push'],
-      isChampion: false
-    },
-    { key: 'electro_dragon', name: 'Electro Dragon', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'electro_dragon', name: 'Electro Dragon', elixir: 5, type: 'troop',
       img: 'ElectroDragonCard.webp',
-      stats: 'Flies and zaps nearby enemies.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'ram_rider', name: 'Ram Rider', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'ram_rider', name: 'Ram Rider', elixir: 5, type: 'troop',
       img: 'RamRiderCard.webp',
-      stats: 'Rider with a bouncing ram.',
-      categories: ['win_condition', 'ground'],
-      isChampion: false
-    },
-    { key: 'minion_horde', name: 'Minion Horde', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'minion_horde', name: 'Minion Horde', elixir: 5, type: 'troop',
       img: 'MinionHordeCard.webp',
-      stats: 'Fires from air, weak to spells.',
-      categories: ['air', 'aoe', 'spell_summon'],
-      isChampion: false
-    },
-    { key: 'prince', name: 'Prince', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'prince', name: 'Prince', elixir: 5, type: 'troop',
       img: 'PrinceCard.webp',
-      stats: 'Charges at enemies with high damage.',
-      categories: ['win_condition', 'damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'balloon', name: 'Balloon', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'balloon', name: 'Balloon', elixir: 5, type: 'troop',
       img: 'BalloonCard.webp',
-      stats: 'Flying building destroyer.',
-      categories: ['win_condition', 'air'],
-      isChampion: false
-    },
-    { key: 'royal_hogs', name: 'Royal Hogs', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'royal_hogs', name: 'Royal Hogs', elixir: 5, type: 'troop',
       img: 'RoyalHogsCard.webp',
-      stats: 'Three hog riders at once.',
-      categories: ['win_condition', 'cycle', 'ground'],
-      isChampion: false
-    },
-    { key: 'witch', name: 'Witch', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'witch', name: 'Witch', elixir: 5, type: 'troop',
       img: 'WitchCard.webp',
-      stats: 'Summons skeletons and deals damage.',
-      categories: ['support', 'spell_summon', 'damage', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'wizard', name: 'Wizard', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'wizard', name: 'Wizard', elixir: 5, type: 'troop',
       img: 'WizardCard.webp',
-      stats: 'Area damage and stun.',
-      categories: ['aoe', 'spell_damage', 'damage'],
-      isChampion: false
-    },
-    { key: 'barbarians', name: 'Barbarians', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'barbarians', name: 'Barbarians', elixir: 5, type: 'troop',
       img: 'BarbariansCard.webp',
-      stats: 'Group of melee fighters.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'giant', name: 'Giant', elixir: 5, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'giant', name: 'Giant', elixir: 5, type: 'troop',
       img: 'GiantCard.webp',
-      stats: 'Slow tank that targets buildings.',
-      categories: ['win_condition', 'tank', 'ground'],
-      isChampion: false
-    },
-    { key: 'mighty_miner', name: 'Mighty Miner', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'mighty_miner', name: 'Mighty Miner', elixir: 4, type: 'troop',
       img: 'MightyMinerCard.webp',
-      stats: 'Tunnels underground to attack.',
-      categories: ['win_condition', 'cycle', 'ground'],
-      isChampion: false
-    },
-    { key: 'golden_knight', name: 'Golden Knight', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'golden_knight', name: 'Golden Knight', elixir: 4, type: 'troop',
       img: 'GoldenKnightCard.webp',
-      stats: 'Jumps to defend and attacks.',
-      categories: ['mini_tank', 'defense', 'ground'],
-      isChampion: false
-    },
-    { key: 'skeleton_king', name: 'Skeleton King', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'skeleton_king', name: 'Skeleton King', elixir: 4, type: 'troop',
       img: 'SkeletonKingCard.webp',
-      stats: 'Summons skeletons when damaged.',
-      categories: ['support', 'spell_summon', 'ground'],
-      isChampion: false
-    },
-    { key: 'mother_witch', name: 'Mother Witch', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'mother_witch', name: 'Mother Witch', elixir: 4, type: 'troop',
       img: 'MotherWitchCard.webp',
-      stats: 'Summons witches when damaged.',
-      categories: ['support', 'spell_summon', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'night_witch', name: 'Night Witch', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'night_witch', name: 'Night Witch', elixir: 4, type: 'troop',
       img: 'NightWitchCard.webp',
-      stats: 'Summons bats and deals damage.',
-      categories: ['support', 'spell_summon', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'lumberjack', name: 'Lumberjack', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'lumberjack', name: 'Lumberjack', elixir: 4, type: 'troop',
       img: 'LumberjackCard.webp',
-      stats: 'Deals damage and spawns a rascal.',
-      categories: ['damage', 'push', 'ground'],
-      isChampion: false
-    },
-    { key: 'goblin_drill', name: 'Goblin Drill', elixir: 4, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_drill', name: 'Goblin Drill', elixir: 4, type: 'building',
       img: 'GoblinDrillCard.webp',
-      stats: 'Drills from underground to attack.',
-      categories: ['win_condition', 'building'],
-      isChampion: false
-    },
-    { key: 'magic_archer', name: 'Magic Archer', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'magic_archer', name: 'Magic Archer', elixir: 4, type: 'troop',
       img: 'MagicArcherCard.webp',
-      stats: 'Shoots through enemies.',
-      categories: ['damage', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'phoenix', name: 'Phoenix', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'phoenix', name: 'Phoenix', elixir: 4, type: 'troop',
       img: 'PhoenixCard.webp',
-      stats: 'Burns enemies and revives as ashes.',
-      categories: ['air', 'aoe', 'push'],
-      isChampion: false
-    },
-    { key: 'goblin_demolisher', name: 'Goblin Demolisher', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_demolisher', name: 'Goblin Demolisher', elixir: 4, type: 'troop',
       img: 'GoblinDemolisherCard.webp',
-      stats: 'Cart that deals damage to buildings.',
-      categories: ['win_condition', 'damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'inferno_dragon', name: 'Inferno Dragon', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'inferno_dragon', name: 'Inferno Dragon', elixir: 4, type: 'troop',
       img: 'InfernoDragonCard.webp',
-      stats: 'Flies and deals increasing damage.',
-      categories: ['air', 'tank_killer', 'damage'],
-      isChampion: false
-    },
-    { key: 'hunter', name: 'Hunter', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'hunter', name: 'Hunter', elixir: 4, type: 'troop',
       img: 'HunterCard.webp',
-      stats: 'Bounces and deals damage in an arc.',
-      categories: ['damage', 'aoe', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'furnace', name: 'Furnace', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'furnace', name: 'Furnace', elixir: 4, type: 'troop',
       img: 'FurnaceCard.webp',
-      stats: 'Spawns fire spirits over time.',
-      categories: ['utility', 'building', 'spell_summon'],
-      isChampion: false
-    },
-    { key: 'zappies', name: 'Zappies', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'zappies', name: 'Zappies', elixir: 4, type: 'troop',
       img: 'ZappiesCard.webp',
-      stats: 'Group of electric goblins.',
-      categories: ['aoe', 'spell_damage', 'damage'],
-      isChampion: false
-    },
-    { key: 'tesla', name: 'Tesla', elixir: 4, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'tesla', name: 'Tesla', elixir: 4, type: 'building',
       img: 'TeslaCard.webp',
-      stats: 'Hidden building that shocks enemies.',
-      categories: ['defense', 'building'],
-      isChampion: false
-    },
-    { key: 'poison', name: 'Poison', elixir: 4, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'poison', name: 'Poison', elixir: 4, type: 'spell',
       img: 'PoisonCard.webp',
-      stats: 'Area that damages and slows enemies.',
-      categories: ['spell_damage', 'aoe'],
-      isChampion: false
-    },
-    { key: 'rune_giant', name: 'Rune Giant', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'rune_giant', name: 'Rune Giant', elixir: 4, type: 'troop',
       img: 'RuneGiantCard.webp',
-      stats: 'Takes damage over time, deals more.',
-      categories: ['tank_killer', 'mini_tank', 'ground'],
-      isChampion: false
-    },
-    { key: 'freeze', name: 'Freeze', elixir: 4, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'freeze', name: 'Freeze', elixir: 4, type: 'spell',
       img: 'FreezeCard.webp',
-      stats: 'Freezes enemies in an area.',
-      categories: ['utility', 'aoe'],
-      isChampion: false
-    },
-    { key: 'battle_healer', name: 'Battle Healer', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'battle_healer', name: 'Battle Healer', elixir: 4, type: 'troop',
       img: 'BattleHealerCard.webp',
-      stats: 'Heals nearby friendly units.',
-      categories: ['support', 'healer', 'air'],
-      isChampion: false
-    },
-    { key: 'dark_prince', name: 'Dark Prince', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'dark_prince', name: 'Dark Prince', elixir: 4, type: 'troop',
       img: 'DarkPrinceCard.webp',
-      stats: 'Charges with a flaming weapon.',
-      categories: ['damage', 'aoe', 'ground'],
-      isChampion: false
-    },
-    { key: 'baby_dragon', name: 'Baby Dragon', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'baby_dragon', name: 'Baby Dragon', elixir: 4, type: 'troop',
       img: 'BabyDragonCard.webp',
-      stats: 'Flying unit with splash damage.',
-      categories: ['air', 'aoe', 'damage'],
-      isChampion: false
-    },
-    { key: 'flying_machine', name: 'Flying Machine', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'flying_machine', name: 'Flying Machine', elixir: 4, type: 'troop',
       img: 'FlyingMachineCard.webp',
-      stats: 'Fast flying ranged attacker.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'mortar', name: 'Mortar', elixir: 4, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'mortar', name: 'Mortar', elixir: 4, type: 'building',
       img: 'MortarCard.webp',
-      stats: 'Long-range splash damage building.',
-      categories: ['defense', 'building', 'aoe'],
-      isChampion: false
-    },
-    { key: 'bomb_tower', name: 'bomb tower', elixir: 4, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'bomb_tower', name: 'bomb tower', elixir: 4, type: 'building',
       img: 'BombTowerCard.webp',
-      stats: 'Splash damage building.',
-      categories: ['defense', 'building', 'aoe'],
-      isChampion: false
-    },
-    { key: 'skeleton_dragons', name: 'Skeleton Dragons', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'skeleton_dragons', name: 'Skeleton Dragons', elixir: 4, type: 'troop',
       img: 'SkeletonDragonsCard.webp',
-      stats: 'Flying skeletons with ranged attacks.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'valkyrie', name: 'Valkyrie', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'valkyrie', name: 'Valkyrie', elixir: 4, type: 'troop',
       img: 'ValkyrieCard.webp',
-      stats: 'Melee unit with splash damage.',
-      categories: ['aoe', 'damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'goblin_cage', name: 'Goblin Cage', elixir: 4, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_cage', name: 'Goblin Cage', elixir: 4, type: 'building',
       img: 'GoblinCageCard.webp',
-      stats: 'Releases goblins when destroyed.',
-      categories: ['utility', 'building', 'spell_summon'],
-      isChampion: false
-    },
-    { key: 'goblin_hut', name: 'Goblin Hut', elixir: 4, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_hut', name: 'Goblin Hut', elixir: 4, type: 'building',
       img: 'GoblinHutCard.webp',
-      stats: 'Spawns goblins over time.',
-      categories: ['utility', 'building'],
-      isChampion: false
-    },
-    { key: 'mini_pekka', name: 'Mini P.E.K.K.A', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'mini_pekka', name: 'Mini P.E.K.K.A', elixir: 4, type: 'troop',
       img: 'MiniPEKKACard.webp',
-      stats: 'Fast, high-damage melee unit.',
-      categories: ['tank_killer', 'mini_tank', 'ground'],
-      isChampion: false
-    },
-    { key: 'musketeer', name: 'Musketeer', elixir: 4, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'musketeer', name: 'Musketeer', elixir: 4, type: 'troop',
       img: 'MusketeerCard.webp',
-      stats: 'Ranged damage dealer.',
-      categories: ['damage', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'little_prince', name: 'Little Prince', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'little_prince', name: 'Little Prince', elixir: 3, type: 'troop',
       img: 'LittlePrinceCard.webp',
-      stats: 'Young prince with a sword.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'fishermen', name: 'Fishermen', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'fishermen', name: 'Fishermen', elixir: 3, type: 'troop',
       img: 'FishermanCard.webp',
-      stats: 'Pulls enemies closer with his rod.',
-      categories: ['utility', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'void', name: 'Void', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'void', name: 'Void', elixir: 3, type: 'spell',
       img: 'VoidCard.webp',
-      stats: 'Pulls units toward the center.',
-      categories: ['utility', 'aoe'],
-      isChampion: false
-    },
-    { key: 'clone', name: 'Clone', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'clone', name: 'Clone', elixir: 3, type: 'spell',
       img: 'CloneCard.webp',
-      stats: 'Clones units in an area.',
-      categories: ['utility', 'spell_summon'],
-      isChampion: false
-    },
-    { key: 'tornado', name: 'Tornado', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'tornado', name: 'Tornado', elixir: 3, type: 'spell',
       img: 'TornadoCard.webp',
-      stats: 'Pulls units and damages them.',
-      categories: ['utility', 'aoe'],
-      isChampion: false
-    },
-    { key: 'elixir_golem', name: 'Elixir Golem', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'elixir_golem', name: 'Elixir Golem', elixir: 3, type: 'troop',
       img: 'ElixirGolemCard.webp',
-      stats: 'Splits into smaller golems on death.',
-      categories: ['utility', 'push', 'ground'],
-      isChampion: false
-    },
-    { key: 'royal_delivery', name: 'Royal Delivery', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'royal_delivery', name: 'Royal Delivery', elixir: 3, type: 'spell',
       img: 'RoyalDeliveryCard.webp',
-      stats: 'Delivers a royal recruit to the front.',
-      categories: ['spell_summon', 'push'],
-      isChampion: false
-    },
-    { key: 'royal_ghost', name: 'Royal Ghost', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'royal_ghost', name: 'Royal Ghost', elixir: 3, type: 'troop',
       img: 'RoyalGhostCard.webp',
-      stats: 'Invisible melee unit.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'ice_wizard', name: 'Ice Wizard', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'ice_wizard', name: 'Ice Wizard', elixir: 3, type: 'troop',
       img: 'IceWizardCard.webp',
-      stats: 'Freezes enemies with his attacks.',
-      categories: ['support', 'aoe', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'earthquake', name: 'Earthquake', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'earthquake', name: 'Earthquake', elixir: 3, type: 'spell',
       img: 'EarthquakeCard.webp',
-      stats: 'Damages buildings and knocks back units.',
-      categories: ['spell_damage', 'aoe'],
-      isChampion: false
-    },
-    { key: 'firecracker', name: 'Firecracker', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'firecracker', name: 'Firecracker', elixir: 3, type: 'troop',
       img: 'FirecrackerCard.webp',
-      stats: 'Jumps and explodes on impact.',
-      categories: ['aoe', 'spell_damage', 'damage'],
-      isChampion: false
-    },
-    { key: 'miner', name: 'Miner', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'miner', name: 'Miner', elixir: 3, type: 'troop',
       img: 'MinerCard.webp',
-      stats: 'Tunnels to a location on the arena.',
-      categories: ['win_condition', 'cycle', 'ground'],
-      isChampion: false
-    },
-    { key: 'princess', name: 'Princess', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'princess', name: 'Princess', elixir: 3, type: 'troop',
       img: 'PrincessCard.webp',
-      stats: 'Long-range damage from the bridge.',
-      categories: ['damage', 'air'],
-      isChampion: false
-    },
-    { key: 'dart_goblin', name: 'Dart Goblin', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'dart_goblin', name: 'Dart Goggins', elixir: 3, type: 'troop',
       img: 'DartGoblinCard.webp',
-      stats: 'Long-range single target damage.',
-      categories: ['damage', 'air'],
-      isChampion: false
-    },
-    { key: 'skeleton_barrel', name: 'Skeleton Barrel', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'skeleton_barrel', name: 'Skeleton Barrel', elixir: 3, type: 'troop',
       img: 'SkeletonBarrelCard.webp',
-      stats: 'Rolls to a building and explodes.',
-      categories: ['win_condition', 'push', 'ground'],
-      isChampion: false
-    },
-    { key: 'goblin_gang', name: 'Goblin Gang', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_gang', name: 'Goblin Gang', elixir: 3, type: 'troop',
       img: 'GoblinGangCard.webp',
-      stats: 'Three goblins that run quickly.',
-      categories: ['cycle', 'ground'],
-      isChampion: false
-    },
-    { key: 'goblin_barrel', name: 'Goblin Barrel', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_barrel', name: 'Goblin Barrel', elixir: 3, type: 'spell',
       img: 'GoblinBarrelCard.webp',
-      stats: 'Delivers goblins to a location.',
-      categories: ['spell_summon', 'cycle'],
-      isChampion: false
-    },
-    { key: 'guards', name: 'Guards', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'guards', name: 'Guards', elixir: 3, type: 'troop',
       img: 'GuardsCard.webp',
-      stats: 'Three shielded melee units.',
-      categories: ['defense', 'ground'],
-      isChampion: false
-    },
-    { key: 'skeleton_army', name: 'Skeleton Army', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'skeleton_army', name: 'Skeleton Army', elixir: 3, type: 'troop',
       img: 'SkeletonArmyCard.webp',
-      stats: 'Group of skeleton troops.',
-      categories: ['spell_summon', 'push', 'ground'],
-      isChampion: false
-    },
-    { key: 'tombstone', name: 'Tombstone', elixir: 3, type: 'building',
+      stats: 'High damage ramping building.' },
+      { key: 'tombstone', name: 'Tombstone', elixir: 3, type: 'building',
       img: 'TombstoneCard.webp',
-      stats: 'Summons skeletons and takes damage.',
-      categories: ['support', 'spell_summon', 'building'],
-      isChampion: false
-    },
-    { key: 'arrows', name: 'Arrows', elixir: 3, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'arrows', name: 'Arrows', elixir: 3, type: 'spell',
       img: 'ArrowsCard.webp',
-      stats: 'Damage multiple small units.',
-      categories: ['spell_damage', 'anti_air'],
-      isChampion: false
-    },
-    { key: 'minions', name: 'Minions', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'minions', name: 'Minions', elixir: 3, type: 'troop',
       img: 'MinionsCard.webp',
-      stats: 'Flying melee units.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'archers', name: 'Archers', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'archers', name: 'Archers', elixir: 3, type: 'troop',
       img: 'ArchersCard.webp',
-      stats: 'Ranged damage dealers.',
-      categories: ['damage', 'air_ground'],
-      isChampion: false
-    },
-    { key: 'goblin_curse', name: 'Goblin Curse', elixir: 2, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'goblin_curse', name: 'Goblin Curse', elixir: 2, type: 'spell',
       img: 'GoblinCurseCard.webp',
-      stats: 'Turns units into weak goblins.',
-      categories: ['utility', 'debuff'],
-      isChampion: false
-    },
-    { key: 'rage', name: 'Rage', elixir: 2, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'rage', name: 'Rage', elixir: 2, type: 'spell',
       img: 'RageCard.webp',
-      stats: 'Speeds up friendly units.',
-      categories: ['utility', 'buff'],
-      isChampion: false
-    },
-    { key: 'suspicious_bush', name: 'Suspicious Bush', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'suspicious_bush', name: 'Suspicious Bush', elixir: 2, type: 'troop',
       img: 'SuspiciousBushCard.webp',
-      stats: 'Bush that may contain a surprise.',
-      categories: ['utility', 'trap'],
-      isChampion: false
-    },
-    { key: 'wall_breakers', name: 'Wall Breakers', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'wall_breakers', name: 'Wall Breakers', elixir: 2, type: 'troop',
       img: 'WallBreakersCard.webp',
-      stats: 'Fast units that destroy buildings quickly.',
-      categories: ['win_condition', 'ground'],
-      isChampion: false
-    },
-    { key: 'log', name: 'Log', elixir: 2, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'log', name: 'Log', elixir: 2, type: 'spell',
       img: 'TheLogCard.webp',
-      stats: 'Rolls and damages units.',
-      categories: ['spell_damage', 'anti_air', 'cycle'],
-      isChampion: false
-    },
-    { key: 'barbarian_barrel', name: 'Barbarian Barrel', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'barbarian_barrel', name: 'Barbarian Barrel', elixir: 2, type: 'troop',
       img: 'BarbarianBarrelCard.webp',
-      stats: 'Rolls and explodes with barbarians.',
-      categories: ['win_condition', 'push', 'ground'],
-      isChampion: false
-    },
-    { key: 'beserker', name: 'Beserker', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'beserker', name: 'Beserker', elixir: 2, type: 'troop',
       img: 'BerserkerCard.webp',
-      stats: 'Fast melee unit with rage.',
-      categories: ['damage', 'ground'],
-      isChampion: false
-    },
-    { key: 'ice_golem', name: 'Ice Golem', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'ice_golem', name: 'Ice Golem', elixir: 2, type: 'troop',
       img: 'IceGolemCard.webp',
-      stats: 'Slow unit that freezes on death.',
-      categories: ['support', 'aoe', 'ground'],
-      isChampion: false
-    },
-    { key: 'snowball', name: 'Snowball', elixir: 2, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'snowball', name: 'Snowball', elixir: 2, type: 'spell',
       img: 'GiantSnowballCard.webp',
-      stats: 'Knocks back and damages units.',
-      categories: ['utility', 'aoe'],
-      isChampion: false
-    },
-    { key: 'bats', name: 'Bats', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'bats', name: 'Bats', elixir: 2, type: 'troop',
       img: 'BatsCard.webp',
-      stats: 'Fast flying melee units.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'bomber', name: 'Bomber', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'bomber', name: 'Bomber', elixir: 2, type: 'troop',
       img: 'BomberCard.webp',
-      stats: 'Throws bombs at enemies.',
-      categories: ['aoe', 'spell_damage', 'damage'],
-      isChampion: false
-    },
-    { key: 'spear_goblins', name: 'Spear Goblins', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'spear_goblins', name: 'Spear Goblins', elixir: 2, type: 'troop',
       img: 'SpearGoblinsCard.webp',
-      stats: 'Goblins with spears that throw.',
-      categories: ['air', 'damage'],
-      isChampion: false
-    },
-    { key: 'goblins', name: 'Goblins', elixir: 2, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'goblins', name: 'Goblins', elixir: 2, type: 'troop',
       img: 'GoblinsCard.webp',
-      stats: 'Fast melee units.',
-      categories: ['cycle', 'ground'],
-      isChampion: false
-    },
-    { key: 'mirror', name: 'Mirror', elixir: 0, type: 'spell',
+      stats: 'High damage ramping building.' },
+      { key: 'mirror', name: 'Mirror', elixir: 0, type: 'spell',
       img: 'wC6Cm9rKLEOk72zTsukVwxewKIoO4ZcMJun54zCPWvA.png',
-      stats: 'Creates a copy of a spell.',
-      categories: ['utility', 'spell_summon'],
-      isChampion: false
-    },
-    { key: 'heal_spirit', name: 'Heal Spirit', elixir: 1, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'heal_spirit', name: 'Heal Spirit', elixir: 1, type: 'troop',
       img: 'HealSpiritCard.webp',
-      stats: 'Heals nearby friendly units.',
-      categories: ['support', 'healer', 'air'],
-      isChampion: false
-    },
-    { key: 'ice_spirit', name: 'Ice Spirit', elixir: 1, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'ice_spirit', name: 'Ice Spirit', elixir: 1, type: 'troop',
       img: 'IceSpiritCard.webp',
-      stats: 'Freezes nearby enemies.',
-      categories: ['support', 'aoe', 'air'],
-      isChampion: false
-    },
-    { key: 'electro_spirit', name: 'Electro Spirit', elixir: 1, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'electro_spirit', name: 'Electro Spirit', elixir: 1, type: 'troop',
       img: 'ElectroSpiritCard.webp',
-      stats: 'Zaps nearby enemies.',
-      categories: ['spell_damage', 'air'],
-      isChampion: false
-    },
-    { key: 'fire_spirit', name: 'Fire Spirit', elixir: 1, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'fire_spirit', name: 'Fire Spirit', elixir: 1, type: 'troop',
       img: 'FireSpiritsCard.webp',
-      stats: 'Burns nearby enemies.',
-      categories: ['aoe', 'spell_damage', 'air'],
-      isChampion: false
-    },
-    { key: 'skeletons', name: 'Skeletons', elixir: 1, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'skeletons', name: 'Skeletons', elixir: 1, type: 'troop',
       img: 'SkeletonsCard.webp',
-      stats: 'Fast melee units.',
-      categories: ['cycle', 'ground'],
-      isChampion: false
-    },
-    { key: 'knight', name: 'Knight', elixir: 3, type: 'troop',
+      stats: 'High damage ramping building.' },
+      { key: 'knight', name: 'Knight', elixir: 3, type: 'troop',
       img: 'KnightCard.webp',
-      stats: 'Basic melee unit.',
-      categories: ['defense', 'ground'],
-      isChampion: false
-    }
+      stats: 'High damage ramping building.' }
   ];
-  
-  // Card synergy rules for scoring
-  const synergyScores = {
-    'hog_rider': { 'zap': 5, 'fireball': 4, 'giant': 3, 'minion_horde': 4, 'goblin_machine': 5, 'cannon': 3, 'electro_wizard': 3 },
-    'giant': { 'wizard': 5, 'witch': 4, 'minion_horde': 4, 'goblin_machine': 3, 'executioner': 4, 'inferno_tower': 5, 'zap': 3 },
-    'prince': { 'zap': 5, 'fireball': 4, 'wizard': 4, 'witch': 3, 'goblin_machine': 3, 'cannon': 3, 'mega_minion': 3 },
-    'balloon': { 'minion_horde': 5, 'executioner': 4, 'mega_minion': 4, 'goblin_machine': 3, 'wizard': 4, 'zap': 3, 'fireball': 3 },
-    'goblinstein': { 'zap': 5, 'fireball': 4, 'minion_horde': 4, 'goblin_machine': 5, 'executioner': 4, 'wizard': 3, 'cannon': 3 },
-    'electro_wizard': { 'giant': 4, 'prince': 4, 'balloon': 4, 'goblinstein': 4, 'wizard': 3, 'witch': 3, 'zap': 3 },
-    'cannon': { 'giant': 3, 'prince': 3, 'hog_rider': 3, 'balloon': 3, 'goblinstein': 3, 'executioner': 3, 'wizard': 3 },
-    'fireball': { 'giant': 3, 'prince': 3, 'hog_rider': 3, 'balloon': 3, 'goblinstein': 3, 'executioner': 3, 'wizard': 3 },
-    'zap': { 'giant': 3, 'prince': 3, 'hog_rider': 3, 'balloon': 3, 'goblinstein': 3, 'executioner': 3, 'wizard': 3 },
-    'inferno_tower': { 'giant': 3, 'prince': 3, 'hog_rider': 3, 'balloon': 3, 'goblinstein': 3, 'executioner': 3, 'wizard': 3 },
-    'bandit': { 'zap': 3, 'fireball': 3, 'giant': 3, 'prince': 3, 'balloon': 3, 'executioner': 3, 'wizard': 3 },
-    'battle_ram': { 'zap': 3, 'fireball': 3, 'giant': 3, 'prince': 3, 'balloon': 3, 'executioner': 3, 'wizard': 3 },
-    'mega_minion': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'monk': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'archer_queen': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'goblin_machine': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'cannon_cart': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'executioner': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'witch': 4, 'archer_queen': 3 },
-    'bowler': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'rascals': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'graveyard': { 'zap': 3, 'fireball': 3, 'giant': 3, 'prince': 3, 'balloon': 3, 'executioner': 3, 'wizard': 3 },
-    'electro_dragon': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'ram_rider': { 'zap': 3, 'fireball': 3, 'giant': 3, 'prince': 3, 'balloon': 3, 'executioner': 3, 'wizard': 3 },
-    'minion_horde': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'witch': 3 },
-    'witch': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'wizard': 4, 'executioner': 3, 'archer_queen': 3 },
-    'wizard': { 'giant': 3, 'prince': 3, 'balloon': 3, 'goblinstein': 3, 'executioner': 3, 'witch': 4, 'archer_queen': 3 },
-    'barbarians': { 'zap': 3, 'fireball': 3, 'giant': 3, 'prince': 3, 'balloon': 3, 'executioner': 3, 'wizard': 3 },
-    'mighty_miner': { 'zap': 3, 'fireball': 3, 'giant': 3, 'prince': 3, 'balloon': 3, 'executioner': 3, 'wizard': 3 }
-  };
-  
-  // Format long names to split them if they exceed 9 characters
-  function formatCardName(name) {
-    // If name is 9 characters or less, keep it as is
-    if (name.length <= 9) {
-      return {
-        main: name,
-        sub: ''
-      };
-    }
-    // For longer names, split into two parts
-    // Try to split at natural word boundaries first
-    if (name.includes(' ')) {
-      const parts = name.split(' ');
-      if (parts.length === 2) {
-        return {
-          main: parts[0],
-          sub: parts[1]
-        };
-      }
-    }
-    // If no space, split in half
-    const midPoint = Math.ceil(name.length / 2);
-    return {
-      main: name.substring(0, midPoint),
-      sub: name.substring(midPoint)
-    };
-  }
-  
   // Sort cards by elixir cost instead of alphabetical (lowest elixir first).
   // If elixir is equal, fall back to alphabetical order by name.
   cards.sort((a, b) => {
     if (a.elixir !== b.elixir) return a.elixir - b.elixir;
     return a.name.localeCompare(b.name);
   });
-  
   const deckSlotsCount = 8;
   let deck = new Array(deckSlotsCount).fill(null);
   let savedDecks = JSON.parse(localStorage.getItem('savedDecks') || '[]');
-  let focusCard = null;
-  let suggestedCards = []; // Track suggested cards in the deck
   const deckEl = document.getElementById('deck');
   const cardsListEl = document.getElementById('cards-list');
-  const focusCardListEl = document.getElementById('focus-card-list');
-  const suggestedCardsEl = document.getElementById('suggested-cards');
-  const reasoningText = document.getElementById('reasoning-text');
   const clearDeckBtn = document.getElementById('clear-deck-btn');
   const saveForm = document.getElementById('save-form');
   const deckNameInput = document.getElementById('deck-name');
   const saveBtn = saveForm.querySelector('button[type="submit"]');
   const savedDecksContainer = document.getElementById('saved-decks');
   const averageElixirDisplay = document.getElementById('average-elixir-display');
-  const deckRatingSection = document.getElementById('deck-rating-section');
-  // Rating elements
-  const offenseFill = document.getElementById('offense-fill');
-  const defenseFill = document.getElementById('defense-fill');
-  const synergyFill = document.getElementById('synergy-fill');
-  const f2pFill = document.getElementById('f2p-fill');
-  const versatilityFill = document.getElementById('versatility-fill');
-  const offenseScore = document.getElementById('offense-score');
-  const defenseScore = document.getElementById('defense-score');
-  const synergyScore = document.getElementById('synergy-score');
-  const f2pScore = document.getElementById('f2p-score');
-  const versatilityScore = document.getElementById('versatility-score');
   // Stats popup elements
   const statsPopupOverlay = document.getElementById('stats-popup-overlay');
   const statsPopupImg = document.getElementById('stats-popup-img');
@@ -1602,7 +841,6 @@
   // Tower select & icon elements (minimal additions)
   const towerSelect = document.getElementById('tower-select');
   const currentTowerIcon = document.getElementById('current-tower-icon');
-  
   // Initialize current tower icon to selection's default on load
   (function initTowerFromSelect() {
     if (towerSelect && towers[towerSelect.value]) {
@@ -1613,258 +851,13 @@
       currentTowerIcon.alt = 'Selected Tower';
     }
   })();
-  
-  // Analyze deck composition
-  function analyzeDeck() {
-    const analysis = {
-      win_conditions: 0,
-      spells: 0,
-      air_support: 0,
-      cycle_cards: 0,
-      defensive_buildings: 0,
-      aoe_cards: 0,
-      mini_tanks: 0,
-      tank_killers: 0,
-      air_killers: 0,
-      avg_elixir: 0,
-      card_types: { troop: 0, spell: 0, building: 0 },
-      categories: {},
-      champions: 0,
-      cards: deck.filter(c => c !== null)
-    };
-    
-    if (analysis.cards.length === 0) return analysis;
-    
-    // Count card types and categories
-    analysis.cards.forEach(card => {
-      analysis.card_types[card.type]++;
-      if (card.categories) {
-        card.categories.forEach(cat => {
-          analysis.categories[cat] = (analysis.categories[cat] || 0) + 1;
-        });
-      }
-      if (card.isChampion) {
-        analysis.champions++;
-      }
-    });
-    
-    // Specific counts
-    analysis.win_conditions = analysis.categories['win_condition'] || 0;
-    analysis.spells = analysis.card_types.spell || 0;
-    analysis.air_support = (analysis.categories['air'] || 0) + (analysis.categories['air_ground'] || 0);
-    analysis.cycle_cards = (analysis.categories['cycle'] || 0);
-    analysis.defensive_buildings = (analysis.categories['defense'] || 0) + (analysis.categories['building'] || 0);
-    analysis.aoe_cards = (analysis.categories['aoe'] || 0);
-    analysis.mini_tanks = analysis.categories['mini_tank'] || 0;
-    analysis.tank_killers = analysis.categories['tank_killer'] || 0;
-    analysis.air_killers = analysis.categories['air'] || 0;
-    
-    // Average elixir
-    analysis.avg_elixir = analysis.cards.reduce((sum, c) => sum + c.elixir, 0) / analysis.cards.length;
-    
-    return analysis;
-  }
-  
-  // Calculate suggestion score for a card based on deck needs
-  function calculateSuggestionScore(card) {
-    const analysis = analyzeDeck();
-    let score = 0;
-    
-    // If card is already in deck, don't suggest it
-    if (deck.some(c => c && c.key === card.key)) {
-      return -1;
-    }
-    
-    // If card is a champion and we already have one, don't suggest
-    if (card.isChampion && analysis.champions > 0) {
-      return -1;
-    }
-    
-    // Win condition balance (ideally 1-2)
-    if (card.categories.includes('win_condition')) {
-      if (analysis.win_conditions === 0) {
-        score += 10; // Strongly recommend if none
-      } else if (analysis.win_conditions === 1) {
-        score += 5; // Recommend if only one
-      } else {
-        score -= 10; // Discourage if already have two
-      }
-    }
-    
-    // Spell balance (ideally 2-3)
-    if (card.type === 'spell') {
-      if (analysis.spells < 2) {
-        score += 8; // Strongly recommend if less than 2
-      } else if (analysis.spells < 4) {
-        score += 4; // Recommend if less than 4
-      } else {
-        score -= 5; // Discourage if already have 4+
-      }
-    }
-    
-    // Air support (ideally at least one)
-    if (card.categories.includes('air') || card.categories.includes('air_ground')) {
-      if (analysis.air_support === 0) {
-        score += 7; // Recommend if no air support
-      } else if (analysis.air_support < 2) {
-        score += 3; // Mildly recommend
-      }
-    }
-    
-    // Cycle cards for high elixir decks
-    if (analysis.avg_elixir > 3.8 && card.categories.includes('cycle')) {
-      score += 6; // Recommend cycle cards for high elixir decks
-    }
-    
-    // Low elixir cards for high elixir decks
-    if (analysis.avg_elixir > 4.0 && card.elixir <= 3) {
-      score += 5; // Recommend low elixir cards
-    }
-    
-    // Defensive buildings for decks with win conditions
-    if (analysis.win_conditions > 0 && (card.categories.includes('defense') || card.categories.includes('building'))) {
-      score += 4; // Recommend defense for offensive decks
-    }
-    
-    // AoE for decks with single target damage
-    if (analysis.aoe_cards === 0 && (card.categories.includes('aoe') || card.categories.includes('spell_damage'))) {
-      score += 6; // Strongly recommend AoE if none
-    }
-    
-    // Mini tanks for decks that need front-line support
-    if (analysis.mini_tanks === 0 && card.categories.includes('mini_tank')) {
-      score += 5;
-    }
-    
-    // Tank killers for decks that need to counter tanks
-    if (analysis.tank_killers === 0 && card.categories.includes('tank_killer')) {
-      score += 5;
-    }
-    
-    // Air killers for decks that need air defense
-    if (analysis.air_killers === 0 && card.categories.includes('air')) {
-      score += 5;
-    }
-    
-    // Synergy with existing cards
-    deck.forEach(deckCard => {
-      if (deckCard && synergyScores[deckCard.key] && synergyScores[deckCard.key][card.key]) {
-        score += synergyScores[deckCard.key][card.key] * 0.5;
-      }
-    });
-    
-    return score;
-  }
-  
-  // Get top suggestions based on deck needs
-  function getTopSuggestions() {
-    // Calculate score for each card
-    const cardScores = cards.map(card => ({
-      card: card,
-      score: calculateSuggestionScore(card)
-    }));
-    
-    // Filter out cards with negative scores and sort by score
-    return cardScores
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 12); // Return top 12 suggestions
-  }
-  
-  // Group suggestions by primary need
-  function groupSuggestions(suggestions) {
-    const groups = {
-      'win_condition': [],
-      'spells': [],
-      'air_killer': [],
-      'aoe': [],
-      'mini_tank': [],
-      'tank_killer': [],
-      'cycle': [],
-      'defense': [],
-      'synergy': []
-    };
-    
-    const analysis = analyzeDeck();
-    
-    suggestions.forEach(item => {
-      const card = item.card;
-      
-      if (card.categories.includes('win_condition') && analysis.win_conditions < 2) {
-        groups['win_condition'].push(card);
-      } else if (card.type === 'spell' && analysis.spells < 3) {
-        groups['spells'].push(card);
-      } else if (card.categories.includes('air') && analysis.air_killers === 0) {
-        groups['air_killer'].push(card);
-      } else if (card.categories.includes('aoe') && analysis.aoe_cards < 2) {
-        groups['aoe'].push(card);
-      } else if (card.categories.includes('mini_tank') && analysis.mini_tanks === 0) {
-        groups['mini_tank'].push(card);
-      } else if (card.categories.includes('tank_killer') && analysis.tank_killers === 0) {
-        groups['tank_killer'].push(card);
-      } else if (card.categories.includes('cycle') && analysis.avg_elixir > 3.5) {
-        groups['cycle'].push(card);
-      } else if ((card.categories.includes('defense') || card.categories.includes('building')) && analysis.defensive_buildings < 2) {
-        groups['defense'].push(card);
-      } else {
-        // Default to synergy
-        groups['synergy'].push(card);
-      }
-    });
-    
-    // Remove empty groups
-    Object.keys(groups).forEach(key => {
-      if (groups[key].length === 0) {
-        delete groups[key];
-      }
-    });
-    
-    return groups;
-  }
-  
-  // Suggest tower based on deck composition
-  function suggestTower() {
-    const analysis = analyzeDeck();
-    
-    if (analysis.cards.length === 0) return null;
-    
-    // Default tower
-    let bestTower = 'princess_tower';
-    
-    // Specific deck archetypes
-    if (analysis.categories['goblin_giant'] > 0) {
-      bestTower = 'royal_chef';
-    } else if (analysis.categories['giant'] > 0 || analysis.categories['golem'] > 0) {
-      bestTower = 'dagger_duchess';
-    } else if (analysis.categories['balloon'] > 0 || analysis.categories['lava_hound'] > 0) {
-      bestTower = 'princess_tower';
-    } else if (analysis.categories['inferno_tower'] > 0 || analysis.categories['x-bow'] > 0) {
-      bestTower = 'canoneer';
-    } else if (analysis.categories['hog_rider'] > 0 || analysis.categories['miner'] > 0) {
-      bestTower = 'princess_tower';
-    }
-    
-    return towers[bestTower];
-  }
-  
-  // Render deck slots with suggested cards
+  // Render deck slots (preserve original functionality exactly)
   function renderDeck() {
     deckEl.innerHTML = '';
     for (let i = 0; i < deckSlotsCount; i++) {
-      // Create a container for the slot and stats icon
-      const container = document.createElement('div');
-      container.className = 'deck-slot-container';
-      
       const slot = document.createElement('div');
       slot.classList.add('deck-slot');
       if (i < 2) slot.classList.add('first-two'); // gradient border for first 2 slots
-      
-      // Check if this slot has a suggested card
-      const suggestedCardIndex = suggestedCards.findIndex(sc => sc.slotIndex === i);
-      if (suggestedCardIndex !== -1) {
-        slot.classList.add('suggested');
-      }
-      
       if (!deck[i]) {
         slot.classList.add('empty');
       } else {
@@ -1873,103 +866,66 @@
         img.src = card.img;
         img.alt = card.name;
         slot.appendChild(img);
-        
         const elixirBadge = document.createElement('div');
         elixirBadge.classList.add('elixir');
         elixirBadge.textContent = card.elixir;
         slot.appendChild(elixirBadge);
+        // Add stat icon (crown)
+        const statIcon = document.createElement('span');
+        statIcon.className = 'stats-icon';
+        statIcon.innerHTML = '&#x1F451;'; // crown emoji
+        statIcon.title = 'View stats';
+        statIcon.addEventListener('click', e => {
+          e.stopPropagation();
+          openStatsPopup(card);
+        });
+        slot.appendChild(statIcon);
       }
-      
       slot.dataset.index = i;
       slot.setAttribute('role', 'listitem');
       slot.setAttribute('aria-label', deck[i] ? deck[i].name : 'Empty slot');
-      
       // Drag and drop handlers for swapping/removing cards
       slot.addEventListener('dragover', e => {
         e.preventDefault();
         slot.classList.add('drag-over');
       });
-      
       slot.addEventListener('dragleave', () => {
         slot.classList.remove('drag-over');
       });
-      
       slot.addEventListener('drop', e => {
         e.preventDefault();
         slot.classList.remove('drag-over');
-        
         const type = e.dataTransfer.getData('type');
-        
         if (type === 'card-list') {
           const cardKey = e.dataTransfer.getData('cardKey');
           const cardToAdd = cards.find(c => c.key === cardKey);
           if (!cardToAdd) return;
-          
-          // Check if adding a champion and remove existing champion if needed
-          if (cardToAdd.isChampion) {
-            // Remove any existing champion
-            for (let j = 0; j < deck.length; j++) {
-              if (deck[j] && deck[j].isChampion) {
-                deck[j] = null;
-                break;
-              }
-            }
-          }
-          
-          // Remove from suggested cards if this slot had a suggestion
-          const suggestedIndex = suggestedCards.findIndex(sc => sc.slotIndex === i);
-          if (suggestedIndex !== -1) {
-            suggestedCards.splice(suggestedIndex, 1);
-          }
-          
-          // Add card to this slot
+          // Add card to this slot if empty or swap if occupied
           deck[i] = cardToAdd;
           renderDeck();
           renderCards();
           updateSaveButton();
-          updateDeckRatings();
-          renderSuggestions();
         } else if (type === 'deck-card') {
           const fromIndex = parseInt(e.dataTransfer.getData('fromIndex'), 10);
           if (fromIndex === i) return;
-          
           // Swap cards between fromIndex and i
           const temp = deck[i];
           deck[i] = deck[fromIndex];
           deck[fromIndex] = temp;
-          
-          // Update suggested cards indices if they were swapped
-          suggestedCards.forEach(sc => {
-            if (sc.slotIndex === fromIndex) sc.slotIndex = i;
-            else if (sc.slotIndex === i) sc.slotIndex = fromIndex;
-          });
-          
           renderDeck();
           renderCards();
           updateSaveButton();
-          updateDeckRatings();
-          renderSuggestions();
         }
       });
-      
       // Click on deck slot removes card from deck
       slot.addEventListener('click', () => {
         if (deck[i]) {
-          // Remove from suggested cards if this slot had a suggestion
-          const suggestedIndex = suggestedCards.findIndex(sc => sc.slotIndex === i);
-          if (suggestedIndex !== -1) {
-            suggestedCards.splice(suggestedIndex, 1);
-          }
-          
           deck[i] = null;
           renderDeck();
           renderCards();
           updateSaveButton();
-          updateDeckRatings();
-          renderSuggestions();
         }
       });
-      
       // Make deck slots draggable
       slot.setAttribute('draggable', true);
       slot.addEventListener('dragstart', e => {
@@ -1981,488 +937,40 @@
         e.dataTransfer.setData('fromIndex', i);
         slot.classList.add('dragging');
       });
-      
       slot.addEventListener('dragend', () => {
         slot.classList.remove('dragging');
       });
-      
-      container.appendChild(slot);
-      
-      // Add stats icon below the slot if there's a card
-      if (deck[i]) {
-        const statIcon = document.createElement('span');
-        statIcon.className = 'stats-icon';
-        statIcon.innerHTML = 'Stats';
-        statIcon.title = 'View stats';
-        statIcon.addEventListener('click', e => {
-          e.stopPropagation();
-          openStatsPopup(deck[i]);
-        });
-        container.appendChild(statIcon);
-      }
-      
-      deckEl.appendChild(container);
+      deckEl.appendChild(slot);
     }
-    
     updateAverageElixir();
-    checkDeckComplete();
   }
-  
-  // Render focus cards ordered by elixir cost
-  function renderFocusCards() {
-    focusCardListEl.innerHTML = '';
-    
-    // Sort cards by elixir cost, then by name
-    const sortedCards = [...cards].sort((a, b) => {
-      if (a.elixir !== b.elixir) return a.elixir - b.elixir;
-      return a.name.localeCompare(b.name);
-    });
-    
-    sortedCards.forEach(card => {
-      const cardDiv = document.createElement('div');
-      cardDiv.className = 'focus-card';
-      if (focusCard && focusCard.key === card.key) {
-        cardDiv.classList.add('selected');
-      }
-      
-      const img = document.createElement('img');
-      img.src = card.img;
-      img.alt = card.name;
-      cardDiv.appendChild(img);
-      
-      const elixirBadge = document.createElement('div');
-      elixirBadge.className = 'elixir';
-      elixirBadge.textContent = card.elixir;
-      cardDiv.appendChild(elixirBadge);
-      
-      cardDiv.addEventListener('click', () => {
-        focusCard = card;
-        renderFocusCards();
-        
-        // Clear deck and suggested cards
-        deck = new Array(deckSlotsCount).fill(null);
-        suggestedCards = [];
-        
-        // Add focus card to first slot
-        deck[0] = card;
-        
-        // Update UI
-        renderDeck();
-        renderCards();
-        updateSaveButton();
-        
-        // Generate suggestions based on focus card
-        renderSuggestions();
-        generateReasoningText();
-      });
-      
-      focusCardListEl.appendChild(cardDiv);
-    });
-  }
-  
-  // Render suggestions in the deck slots and the suggestion panel
-  function renderSuggestions() {
-    // Clear previous suggestions from deck
-    suggestedCards = [];
-    
-    // Only show suggestions if we have a focus card
-    if (!focusCard) {
-      suggestedCardsEl.innerHTML = '<div style="color: #facc15; text-align: center;">Select a focus card to see suggestions</div>';
-      renderDeck();
-      return;
-    }
-    
-    // Get top suggestions
-    const topSuggestions = getTopSuggestions();
-    
-    // Render the deck with suggested cards (but don't auto-add to empty slots)
-    renderDeck();
-    
-    // Render suggestions in the panel
-    renderSuggestionPanel(topSuggestions);
-  }
-  
-  // Render the suggestion panel
-  function renderSuggestionPanel(suggestions) {
-    suggestedCardsEl.innerHTML = '';
-    
-    if (suggestions.length === 0) {
-      const noSuggestions = document.createElement('div');
-      noSuggestions.textContent = 'Your deck looks balanced!';
-      noSuggestions.style.color = '#facc15';
-      noSuggestions.style.textAlign = 'center';
-      noSuggestions.style.width = '100%';
-      suggestedCardsEl.appendChild(noSuggestions);
-      return;
-    }
-    
-    // Group suggestions by primary need
-    const groupedSuggestions = groupSuggestions(suggestions);
-    
-    // Render each group
-    Object.keys(groupedSuggestions).forEach(category => {
-      const categoryCards = groupedSuggestions[category];
-      if (categoryCards.length === 0) return;
-      
-      const categoryDiv = document.createElement('div');
-      categoryDiv.className = 'suggestion-category';
-      
-      const categoryHeader = document.createElement('div');
-      categoryHeader.className = 'category-header';
-      
-      // Convert category to readable label
-      switch(category) {
-        case 'win_condition': categoryHeader.textContent = 'Win Conditions'; break;
-        case 'spells': categoryHeader.textContent = 'Spells'; break;
-        case 'air_killer': categoryHeader.textContent = 'Air Killers'; break;
-        case 'aoe': categoryHeader.textContent = 'AoE Cards'; break;
-        case 'mini_tank': categoryHeader.textContent = 'Mini Tanks'; break;
-        case 'tank_killer': categoryHeader.textContent = 'Tank Killers'; break;
-        case 'cycle': categoryHeader.textContent = 'Cycle Cards'; break;
-        case 'defense': categoryHeader.textContent = 'Defense'; break;
-        case 'synergy': categoryHeader.textContent = 'Synergy Picks'; break;
-        default: categoryHeader.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-      }
-      
-      categoryDiv.appendChild(categoryHeader);
-      
-      const suggestionGrid = document.createElement('div');
-      suggestionGrid.className = 'suggestion-grid';
-      
-      categoryCards.forEach(card => {
-        const suggestionItem = document.createElement('div');
-        suggestionItem.className = 'suggestion-item';
-        
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'card';
-        
-        const img = document.createElement('img');
-        img.src = card.img;
-        img.alt = card.name;
-        cardDiv.appendChild(img);
-        
-        const elixirBadge = document.createElement('div');
-        elixirBadge.className = 'elixir';
-        elixirBadge.textContent = card.elixir;
-        cardDiv.appendChild(elixirBadge);
-        
-        cardDiv.addEventListener('click', () => {
-          // Find first empty slot
-          const firstEmpty = deck.findIndex(c => !c);
-          if (firstEmpty !== -1) {
-            // Remove from suggested cards if this slot was suggested
-            const slotSuggestedIndex = suggestedCards.findIndex(sc => sc.slotIndex === firstEmpty);
-            if (slotSuggestedIndex !== -1) {
-              suggestedCards.splice(slotSuggestedIndex, 1);
-            }
-            
-            deck[firstEmpty] = card;
-            renderDeck();
-            renderCards();
-            updateSaveButton();
-            updateDeckRatings();
-            renderSuggestions();
-          }
-        });
-        
-        suggestionItem.appendChild(cardDiv);
-        suggestionGrid.appendChild(suggestionItem);
-      });
-      
-      categoryDiv.appendChild(suggestionGrid);
-      suggestedCardsEl.appendChild(categoryDiv);
-    });
-    
-    // Add tower suggestion
-    const suggestedTower = suggestTower();
-    if (suggestedTower) {
-      const towerSuggestion = document.createElement('div');
-      towerSuggestion.style.color = '#facc15';
-      towerSuggestion.style.fontSize = '14px';
-      towerSuggestion.style.marginTop = '10px';
-      towerSuggestion.innerHTML = `💡 Suggested Tower: <strong>${suggestedTower.name}</strong>`;
-      suggestedCardsEl.appendChild(towerSuggestion);
-    }
-  }
-  
-  // Generate reasoning text based on focus card and current deck
-  function generateReasoningText() {
-    if (!focusCard) {
-      reasoningText.textContent = "Select a focus card to see deck recommendations and strategy.";
-      return;
-    }
-    
-    let reasoning = "";
-    
-    // Base on focus card
-    switch(focusCard.key) {
-      case 'hog_rider':
-        reasoning = `Hog Rider, a strong, fast win condition commonly used in cycle decks with high defense such as Hog 2.6. This strategy focuses on defending with low-cost troops and buildings, then counter-attacking with the Hog Rider. Key synergies include Zap for clearing swarms, Cannon for defense, and Mega Minion for air support.`;
-        break;
-      case 'giant':
-        reasoning = `Giant is a classic win condition that tanks damage for your other units. It works best in beatdown decks with high-damage support troops like Wizard, Witch, or Minion Horde. The Giant absorbs tower damage while your support units deal damage. Include defensive spells like Fireball or Zap to protect your Giant from swarms.`;
-        break;
-      case 'prince':
-        reasoning = `Prince is a high-damage charge troop that excels in burst damage strategies. When paired with support troops like Wizard or Witch, the Prince can deliver devastating attacks. Use defensive buildings like Cannon or Inferno Tower to protect your side of the arena while you build up for a powerful push.`;
-        break;
-      case 'balloon':
-        reasoning = `Balloon is an air-based win condition that targets buildings. It's vulnerable to air defense, so pairing it with Minion Horde or Mega Minion provides excellent protection. Use spells like Fireball or Zap to clear enemy defenses that could stop your Balloon. This deck focuses on air superiority and building destruction.`;
-        break;
-      case 'goblinstein':
-        reasoning = `Goblinstein is a powerful champion with ramping damage that excels against buildings. It works well in decks that can protect it while it charges up. Pair with defensive spells like Zap or Fireball to clear swarms, and include air support like Mega Minion to handle air threats. This creates a strong offensive push with good defensive capabilities.`;
-        break;
-      default:
-        reasoning = `${focusCard.name} is a ${focusCard.categories.includes('win_condition') ? 'win condition' : 
-                    focusCard.categories.includes('damage') ? 'damage dealer' : 
-                    focusCard.type} that works well in decks focusing on ${focusCard.categories.includes('cycle') ? 'fast cycling' : 
-                    focusCard.categories.includes('push') ? 'powerful pushes' : 'balanced gameplay'}. 
-                    It synergizes well with cards that complement its strengths and cover its weaknesses.`;
-    }
-    
-    // Add dynamic analysis based on current deck
-    const analysis = analyzeDeck();
-    
-    if (analysis.cards.length > 1) {
-      reasoning += " Currently, your deck ";
-      
-      if (analysis.win_conditions === 0) {
-        reasoning += "lacks a clear win condition, ";
-      } else if (analysis.win_conditions > 2) {
-        reasoning += "has too many win conditions, ";
-      }
-      
-      if (analysis.spells < 2) {
-        reasoning += "needs more spells for defense and offense, ";
-      } else if (analysis.spells > 3) {
-        reasoning += "has too many spells, ";
-      }
-      
-      if (analysis.air_support === 0) {
-        reasoning += "has no air support, ";
-      }
-      
-      if (analysis.aoe_cards === 0) {
-        reasoning += "lacks area damage for swarm units, ";
-      }
-      
-      if (analysis.avg_elixir > 4.0) {
-        reasoning += "has a high average elixir cost, consider adding cycle cards, ";
-      } else if (analysis.avg_elixir < 3.0) {
-        reasoning += "has a low average elixir cost, consider adding more powerful cards, ";
-      }
-      
-      // Remove trailing comma and space
-      if (reasoning.endsWith(", ")) {
-        reasoning = reasoning.slice(0, -2) + ".";
-      } else {
-        reasoning += "is shaping up well.";
-      }
-    }
-    
-    reasoningText.textContent = reasoning;
-  }
-  
-  // Update deck ratings based on current deck composition
-  function updateDeckRatings() {
-    if (deck.every(c => c === null)) {
-      // Reset ratings if deck is empty
-      offenseFill.style.width = '0%';
-      defenseFill.style.width = '0%';
-      synergyFill.style.width = '0%';
-      f2pFill.style.width = '0%';
-      versatilityFill.style.width = '0%';
-      offenseScore.textContent = '0';
-      defenseScore.textContent = '0';
-      synergyScore.textContent = '0';
-      f2pScore.textContent = '0';
-      versatilityScore.textContent = '0';
-      return;
-    }
-    
-    const cardsInDeck = deck.filter(c => c !== null);
-    
-    // Calculate offense score (based on win conditions and damage)
-    let offense = 0;
-    
-    cardsInDeck.forEach(card => {
-      if (card.categories.includes('win_condition')) offense += 20;
-      if (card.categories.includes('damage')) offense += 10;
-      if (card.categories.includes('push')) offense += 5;
-      if (card.categories.includes('aoe')) offense += 8;
-      if (card.categories.includes('tank_killer')) offense += 10;
-    });
-    
-    offense = Math.min(100, offense);
-    
-    // Calculate defense score (based on defensive cards)
-    let defense = 0;
-    
-    cardsInDeck.forEach(card => {
-      if (card.categories.includes('defense')) defense += 25;
-      if (card.categories.includes('building')) defense += 15;
-      if (card.categories.includes('spell_damage')) defense += 10;
-      if (card.key === 'inferno_tower') defense += 10;
-      if (card.categories.includes('aoe')) defense += 8;
-      if (card.categories.includes('air')) defense += 10;
-    });
-    
-    // Add tower bonus to defense
-    if (towerSelect && towerSelect.value === 'dagger_duchess') {
-      defense += 10;
-    } else if (towerSelect && towerSelect.value === 'canoneer') {
-      defense += 5;
-    }
-    
-    defense = Math.min(100, defense);
-    
-    // Calculate synergy score (based on card combinations)
-    let synergy = 0;
-    
-    for (let i = 0; i < cardsInDeck.length; i++) {
-      for (let j = i + 1; j < cardsInDeck.length; j++) {
-        const card1 = cardsInDeck[i];
-        const card2 = cardsInDeck[j];
-        
-        // Check if card1 has synergy with card2
-        if (synergyScores[card1.key] && synergyScores[card1.key][card2.key]) {
-          synergy += synergyScores[card1.key][card2.key];
-        }
-        
-        // Check if card2 has synergy with card1
-        if (synergyScores[card2.key] && synergyScores[card2.key][card1.key]) {
-          synergy += synergyScores[card2.key][card1.key];
-        }
-      }
-    }
-    
-    // Normalize synergy score
-    synergy = Math.min(100, Math.round((synergy / 10) * 8));
-    
-    // Calculate F2P score (based on card availability and elixir)
-    let f2p = 100; // Start with perfect score
-    
-    cardsInDeck.forEach(card => {
-      // Penalize for high elixir cards
-      if (card.elixir >= 5) f2p -= 5;
-      if (card.elixir >= 6) f2p -= 5;
-      if (card.elixir >= 7) f2p -= 10;
-      
-      // Penalize for multiple high-cost cards
-      if (cardsInDeck.filter(c => c.elixir >= 6).length > 2) {
-        f2p -= 10;
-      }
-    });
-    
-    f2p = Math.max(50, f2p); // Minimum 50 for any valid deck
-    
-    // Calculate versatility score
-    let versatility = 0;
-    const typeCount = { troop: 0, spell: 0, building: 0 };
-    
-    cardsInDeck.forEach(card => {
-      typeCount[card.type]++;
-    });
-    
-    // Diversity in types
-    const typeVariety = Object.values(typeCount).filter(count => count > 0).length;
-    versatility += typeVariety * 15;
-    
-    // Air/ground coverage
-    const hasAir = cardsInDeck.some(c => c.categories.includes('air') || c.categories.includes('air_ground'));
-    const hasGround = cardsInDeck.some(c => c.categories.includes('ground'));
-    
-    if (hasAir && hasGround) versatility += 20;
-    
-    // Spell coverage
-    const hasSpellDamage = cardsInDeck.some(c => c.categories.includes('spell_damage'));
-    const hasSpellSummon = cardsInDeck.some(c => c.categories.includes('spell_summon'));
-    
-    if (hasSpellDamage || hasSpellSummon) versatility += 15;
-    
-    // Cycle capability
-    const avgElixir = cardsInDeck.reduce((sum, c) => sum + c.elixir, 0) / cardsInDeck.length;
-    
-    if (avgElixir <= 3.5) versatility += 15;
-    else if (avgElixir <= 4.0) versatility += 10;
-    
-    versatility = Math.min(100, versatility);
-    
-    // Update the UI
-    offenseFill.style.width = `${offense}%`;
-    defenseFill.style.width = `${defense}%`;
-    synergyFill.style.width = `${synergy}%`;
-    f2pFill.style.width = `${f2p}%`;
-    versatilityFill.style.width = `${versatility}%`;
-    
-    offenseScore.textContent = Math.round(offense);
-    defenseScore.textContent = Math.round(defense);
-    synergyScore.textContent = Math.round(synergy);
-    f2pScore.textContent = Math.round(f2p);
-    versatilityScore.textContent = Math.round(versatility);
-  }
-  
-  // Check if deck is complete and show/hide ratings
-  function checkDeckComplete() {
-    const isComplete = deck.every(card => card !== null);
-    
-    if (isComplete) {
-      deckRatingSection.style.display = 'block';
-    } else {
-      deckRatingSection.style.display = 'none';
-    }
-  }
-  
-  // Render all cards ordered by elixir cost (no grouping)
+  // Render all cards in a single list, excluding those already in deck
   function renderCards() {
     cardsListEl.innerHTML = '';
     
-    // Sort cards by elixir cost, then by name
-    const sortedCards = [...cards].sort((a, b) => {
-      if (a.elixir !== b.elixir) return a.elixir - b.elixir;
-      return a.name.localeCompare(b.name);
-    });
+    // Get keys of cards already in deck
+    const deckCardKeys = deck.filter(c => c !== null).map(c => c.key);
     
-    // Create a card for each available card
-    sortedCards.forEach(card => {
-      // Skip cards already in the deck
-      if (deck.some(c => c && c.key === card.key)) return;
-      
+    // Filter out cards that are already in the deck and sort by elixir cost and name
+    const availableCards = cards.filter(c => !deckCardKeys.includes(c.key));
+    
+    // Create a card element for each available card
+    availableCards.forEach(card => {
       const cardDiv = document.createElement('div');
       cardDiv.className = 'card';
       cardDiv.draggable = true;
-      
-      // Elixir cost (darker pink, above the card)
-      const elixirSpan = document.createElement('span');
-      elixirSpan.className = 'elixir-cost';
-      elixirSpan.textContent = card.elixir;
-      cardDiv.appendChild(elixirSpan);
-      
       const img = document.createElement('img');
       img.src = card.img;
       img.alt = card.name;
       cardDiv.appendChild(img);
-      
-      // Card name (below the card)
-      const nameContainer = document.createElement('div');
-      nameContainer.className = 'card-name-container';
-      
-      const nameMain = document.createElement('div');
-      nameMain.className = 'card-name-main';
-      
-      const nameSub = document.createElement('div');
-      nameSub.className = 'card-name-sub';
-      
-      const formattedName = formatCardName(card.name);
-      nameMain.textContent = formattedName.main;
-      nameSub.textContent = formattedName.sub;
-      
-      nameContainer.appendChild(nameMain);
-      if (formattedName.sub) {
-        nameContainer.appendChild(nameSub);
-      }
-      
-      cardDiv.appendChild(nameContainer);
-      
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = card.name;
+      cardDiv.appendChild(nameSpan);
+      const elixirSpan = document.createElement('span');
+      elixirSpan.className = 'elixir';
+      elixirSpan.textContent = card.elixir;
+      cardDiv.appendChild(elixirSpan);
       // Stat sheet icon (crown)
       const statIcon = document.createElement('span');
       statIcon.className = 'stats-icon';
@@ -2472,72 +980,42 @@
         e.stopPropagation();
         openStatsPopup(card);
       });
-      
       cardDiv.appendChild(statIcon);
-      
-      // Click to add card to first empty slot
       cardDiv.addEventListener('click', () => {
-        // Find first empty slot
         const firstEmpty = deck.findIndex(c => !c);
         if (firstEmpty !== -1) {
-          // Check if adding a champion and remove existing champion if needed
-          if (card.isChampion) {
-            // Remove any existing champion
-            for (let j = 0; j < deck.length; j++) {
-              if (deck[j] && deck[j].isChampion) {
-                deck[j] = null;
-                break;
-              }
-            }
-          }
-          
-          // Remove from suggested cards if this slot was suggested
-          const slotSuggestedIndex = suggestedCards.findIndex(sc => sc.slotIndex === firstEmpty);
-          if (slotSuggestedIndex !== -1) {
-            suggestedCards.splice(slotSuggestedIndex, 1);
-          }
-          
           deck[firstEmpty] = card;
           renderDeck();
           renderCards();
           updateSaveButton();
-          updateDeckRatings();
-          renderSuggestions();
         }
       });
-      
       cardDiv.addEventListener('dragstart', e => {
         e.dataTransfer.setData('type', 'card-list');
         e.dataTransfer.setData('cardKey', card.key);
         cardDiv.classList.add('dragging');
       });
-      
       cardDiv.addEventListener('dragend', () => {
         cardDiv.classList.remove('dragging');
       });
-      
       cardsListEl.appendChild(cardDiv);
     });
   }
-  
   // Update Save button enable/disable based on deck & name
   function updateSaveButton() {
     const deckHasCards = deck.some(c => c !== null);
     const nameHasText = deckNameInput.value.trim().length > 0;
     saveBtn.disabled = !(deckHasCards && nameHasText);
   }
-  
   function updateAverageElixir() {
     const cardsInDeck = deck.filter(c => c !== null);
     if (cardsInDeck.length === 0) {
       averageElixirDisplay.textContent = '';
       return;
     }
-    
     const avg = (cardsInDeck.reduce((acc, c) => acc + c.elixir, 0) / cardsInDeck.length).toFixed(2);
     averageElixirDisplay.textContent = `Average Elixir Cost: ${avg}`;
   }
-  
   // Open stats popup
   function openStatsPopup(card) {
     statsPopupImg.src = card.img;
@@ -2547,88 +1025,69 @@
     statsPopupElixir.textContent = card.elixir;
     statsPopupOverlay.style.display = 'flex';
   }
-  
   statsPopupCloseBtn.addEventListener('click', () => {
     statsPopupOverlay.style.display = 'none';
   });
-  
   statsPopupOverlay.addEventListener('click', (e) => {
     if (e.target === statsPopupOverlay) {
       statsPopupOverlay.style.display = 'none';
     }
   });
-  
   // Save decks to localStorage
   function saveDecksToStorage() {
     localStorage.setItem('savedDecks', JSON.stringify(savedDecks));
   }
-  
   // Render saved decks list
   function renderSavedDecks() {
     savedDecksContainer.innerHTML = '';
-    
     savedDecks.forEach((deckObj, idx) => {
       const deckDiv = document.createElement('div');
       deckDiv.className = 'saved-deck';
       deckDiv.setAttribute('tabindex', '0');
       deckDiv.setAttribute('role', 'button');
       deckDiv.setAttribute('aria-label', `Load saved deck ${deckObj.name}`);
-      
       // top row: name + (cards horizontal row)
       const topRow = document.createElement('div');
       topRow.className = 'saved-deck-top';
-      
       const leftCol = document.createElement('div');
       leftCol.className = 'saved-deck-left';
-      
       const nameDiv = document.createElement('div');
       nameDiv.className = 'saved-deck-name';
       nameDiv.textContent = deckObj.name;
       leftCol.appendChild(nameDiv);
-      
       const cardsRow = document.createElement('div');
       cardsRow.className = 'saved-deck-cards-row';
-      
       // Ensure we put all card images in a single horizontal row for the saved deck
       deckObj.cards.forEach(cardKey => {
         const cardData = cards.find(c => c.key === cardKey);
         if (!cardData) return;
-        
         const img = document.createElement('img');
         img.src = cardData.img;
         img.alt = cardData.name;
         cardsRow.appendChild(img);
       });
-      
       leftCol.appendChild(cardsRow);
       topRow.appendChild(leftCol);
-      
       // right side of top row reserved for tower placeholder (kept minimal)
       const rightCol = document.createElement('div');
       rightCol.style.display = 'flex';
       rightCol.style.alignItems = 'center';
       rightCol.style.justifyContent = 'center';
-      
       // We do not put the tower here anymore; user requested tower below the deck,
       // so keep the topRow compact and put tower below.
       topRow.appendChild(rightCol);
-      
       deckDiv.appendChild(topRow);
-      
       // tower below the card row: show the specific tower troop for this saved deck
       const towerRow = document.createElement('div');
       towerRow.className = 'saved-deck-tower';
-      
       const towerLabel = document.createElement('div');
       towerLabel.style.fontSize = '12px';
       towerLabel.style.color = '#facc15';
       towerLabel.style.fontWeight = 'bold';
       towerLabel.textContent = 'Tower:';
       towerRow.appendChild(towerLabel);
-      
       const towerImg = document.createElement('img');
       towerImg.className = 'tower-icon';
-      
       if (deckObj.tower && towers[deckObj.tower]) {
         towerImg.src = towers[deckObj.tower].img;
         towerImg.alt = towers[deckObj.tower].name;
@@ -2636,34 +1095,26 @@
         towerImg.src = '';
         towerImg.alt = 'No Tower';
       }
-      
       towerRow.appendChild(towerImg);
       deckDiv.appendChild(towerRow);
-      
       // Pencil icon for instant delete + load deck (preserve original functionality)
       const editBtn = document.createElement('button');
       editBtn.className = 'edit-deck-btn';
       editBtn.title = 'Delete deck and load it';
       editBtn.innerHTML = '&#9998;'; // pencil icon
-      
       editBtn.addEventListener('click', e => {
         e.stopPropagation();
-        
         // Delete deck immediately
         savedDecks.splice(idx, 1);
         saveDecksToStorage();
         renderSavedDecks();
-        
         // Load deck cards into deck variable and deck name input
         deck = new Array(deckSlotsCount).fill(null);
-        
         deckObj.cards.forEach((key, i) => {
           const c = cards.find(card => card.key === key);
           if (c) deck[i] = c;
         });
-        
         deckNameInput.value = deckObj.name;
-        
         // restore tower selection into select and the deck-side icon
         if (towerSelect) {
           if (deckObj.tower && towers[deckObj.tower]) {
@@ -2681,23 +1132,16 @@
             }
           }
         }
-        
         renderDeck();
         renderCards();
         updateSaveButton();
-        updateDeckRatings();
-        renderSuggestions();
-        generateReasoningText();
       });
-      
       deckDiv.appendChild(editBtn);
-      
       // Delete button (preserve original)
       const delBtn = document.createElement('button');
       delBtn.className = 'delete-deck-btn';
       delBtn.title = 'Delete deck';
       delBtn.innerHTML = '&times;';
-      
       delBtn.addEventListener('click', e => {
         e.stopPropagation();
         if (confirm(`Delete deck "${deckObj.name}"?`)) {
@@ -2706,20 +1150,15 @@
           renderSavedDecks();
         }
       });
-      
       deckDiv.appendChild(delBtn);
-      
       // Click on saved deck loads it (preserve original)
       deckDiv.addEventListener('click', () => {
         deck = new Array(deckSlotsCount).fill(null);
-        
         deckObj.cards.forEach((key, i) => {
           const c = cards.find(card => card.key === key);
           if (c) deck[i] = c;
         });
-        
         deckNameInput.value = deckObj.name;
-        
         // restore tower selection into select and the deck-side icon
         if (towerSelect) {
           if (deckObj.tower && towers[deckObj.tower]) {
@@ -2737,32 +1176,22 @@
             }
           }
         }
-        
         renderDeck();
         renderCards();
         updateSaveButton();
-        updateDeckRatings();
-        renderSuggestions();
-        generateReasoningText();
       });
-      
       savedDecksContainer.appendChild(deckDiv);
     });
   }
-  
   // Check if deck with same cards and same first two cards (ignoring order) exists
   function isDuplicateDeck(newDeckCards) {
     if (newDeckCards.length !== deckSlotsCount) return false;
-    
     const newCardsSorted = [...newDeckCards].filter(Boolean).map(c => c.key).sort();
     const newFirstTwo = newDeckCards.slice(0, 2).filter(Boolean).map(c => c.key);
-    
     for (const saved of savedDecks) {
       if (saved.cards.length !== deckSlotsCount) continue;
-      
       const savedCardsSorted = [...saved.cards].sort();
       const savedFirstTwo = saved.cards.slice(0, 2).filter(Boolean);
-      
       if (arraysEqual(newCardsSorted, savedCardsSorted)) {
         if (newFirstTwo.length === savedFirstTwo.length &&
           newFirstTwo.every(c => savedFirstTwo.includes(c))) {
@@ -2770,10 +1199,8 @@
         }
       }
     }
-    
     return false;
   }
-  
   // Utility function to check array equality
   function arraysEqual(a1, a2) {
     if (a1.length !== a2.length) return false;
@@ -2782,63 +1209,46 @@
     }
     return true;
   }
-  
   // Save form submit handler
   saveForm.addEventListener('submit', e => {
     e.preventDefault();
     const name = deckNameInput.value.trim();
-    
     if (!name) return;
-    
     // Check if deck name exists - no duplicates allowed
     if (savedDecks.some(d => d.name.toLowerCase() === name.toLowerCase())) {
       alert('A deck with this name already exists. Please choose a different name.');
       return;
     }
-    
     if (deck.some(c => c === null)) {
       alert('Please fill all deck slots before saving.');
       return;
     }
-    
     if (isDuplicateDeck(deck)) {
       alert('A deck with the same cards and same first two cards already exists.');
       return;
     }
-    
     // Minimal addition: include tower selection (value) when saving
     const towerValue = (towerSelect && towerSelect.value) ? towerSelect.value : null;
-    
     savedDecks.push({
       name: name,
       cards: deck.map(c => c.key),
       tower: towerValue
     });
-    
     saveDecksToStorage();
     renderSavedDecks();
     deckNameInput.value = '';
     updateSaveButton();
     alert(`Deck "${name}" saved!`);
   });
-  
   clearDeckBtn.addEventListener('click', () => {
     if (confirm('Clear the deck?')) {
       deck = new Array(deckSlotsCount).fill(null);
-      focusCard = null;
-      suggestedCards = [];
       renderDeck();
-      renderFocusCards();
       renderCards();
       updateSaveButton();
-      updateDeckRatings();
-      renderSuggestions();
-      generateReasoningText();
     }
   });
-  
   deckNameInput.addEventListener('input', updateSaveButton);
-  
   // Update current deck-side tower icon when select changes (minimal behavior addition)
   if (towerSelect) {
     towerSelect.addEventListener('change', () => {
@@ -2850,23 +1260,14 @@
         currentTowerIcon.src = '';
         currentTowerIcon.alt = 'Selected Tower';
       }
-      
-      // Update ratings when tower changes
-      updateDeckRatings();
     });
   }
-  
   function init() {
     renderDeck();
     renderCards();
-    renderFocusCards();
-    renderSuggestions();
     renderSavedDecks();
     updateSaveButton();
-    updateDeckRatings();
-    generateReasoningText();
   }
-  
   init();
 </script>
 </body>
