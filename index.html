@@ -137,32 +137,18 @@
     font-size: 18px;
     color: gold; /* changed color to gold */
   }
-  /* stacked groups vertically, cards inside group horizontally */
+  /* Single list for all cards */
   #cards-list {
     margin-top: 10px;
     display: flex;
-    flex-direction: column; /* vertical stack */
-    gap: 20px;
-  }
-  .card-group {
-    max-width: 100%;
-    display: flex;       /* cards side by side */
-    gap: 10px;          /* cards closer horizontally */
-    flex-wrap: wrap;     /* wrap cards if needed */
-  }
-  .card-group h3 {
-    width: 100%;
-    margin-top: 0;
-    border-bottom: 2px solid #daa520;
-    padding-bottom: 5px;
-    color: #facc15;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
   }
   .card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 8px 0;
-    padding: 4px 6px;
     background: white;
     border-radius: 6px;
     box-shadow: 0 0 5px rgb(218 165 32 / 0.5);
@@ -170,6 +156,7 @@
     user-select: none;
     transition: background 0.2s ease;
     position: relative;
+    padding: 4px;
   }
   .card:active {
     cursor: grabbing;
@@ -178,9 +165,8 @@
     background: #fde68a;
   }
   .card img {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 6px;
+    width: 80px;
+    height: 80px;
     pointer-events: none;
   }
   .card .elixir {
@@ -201,12 +187,13 @@
   }
   .stats-icon {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
+    top: 2px;
+    left: 2px;
     cursor: pointer;
     user-select: none;
     font-size: 18px;
     color: gold;
+    z-index: 1;
   }
   #saved-decks-container {
     width: 320px;
@@ -431,7 +418,7 @@
     </form>
   </div>
   <div id="cards-list" aria-label="Available cards">
-    <!-- cards grouped by type rendered here -->
+    <!-- cards will be rendered here in a single list ordered by elixir cost -->
   </div>
 </div>
 <div id="saved-decks-container" aria-live="polite" aria-atomic="true">
@@ -835,8 +822,7 @@
       img: 'KnightCard.webp',
       stats: 'High damage ramping building.' }
   ];
-  // Sort cards by elixir cost instead of alphabetical (lowest elixir first).
-  // If elixir is equal, fall back to alphabetical order by name.
+  // Sort cards by elixir cost (lowest first), then by name
   cards.sort((a, b) => {
     if (a.elixir !== b.elixir) return a.elixir - b.elixir;
     return a.name.localeCompare(b.name);
@@ -965,61 +951,68 @@
     }
     updateAverageElixir();
   }
-  // Render cards grouped by type, excluding those already in deck
+  // Render all cards in a single list ordered by elixir cost, excluding those already in deck
   function renderCards() {
     cardsListEl.innerHTML = '';
-    const groups = { troop: [], spell: [], building: [] };
-    deck.forEach(c => { if (c) groups[c.type].push(c.key); });
-    ['troop', 'spell', 'building'].forEach(type => {
-      const groupCards = cards.filter(c => c.type === type && !groups[type].includes(c.key));
-      if (groupCards.length === 0) return;
-      const groupDiv = document.createElement('div');
-      groupDiv.className = 'card-group';
-      const groupTitle = document.createElement('h3');
-      groupTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1) + 's';
-      groupDiv.appendChild(groupTitle);
-      groupCards.forEach(card => {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'card';
-        cardDiv.draggable = true;
-        const img = document.createElement('img');
-        img.src = card.img;
-        img.alt = card.name;
-        cardDiv.appendChild(img);
-        const elixirBadge = document.createElement('div');
-        elixirBadge.classList.add('elixir');
-        elixirBadge.textContent = card.elixir;
-        cardDiv.appendChild(elixirBadge);
-        // Stat sheet icon (crown)
-        const statIcon = document.createElement('span');
-        statIcon.className = 'stats-icon';
-        statIcon.innerHTML = '&#x1F451;'; // crown emoji
-        statIcon.title = 'View stats';
-        statIcon.addEventListener('click', e => {
-          e.stopPropagation();
-          openStatsPopup(card);
-        });
-        cardDiv.appendChild(statIcon);
-        cardDiv.addEventListener('click', () => {
-          const firstEmpty = deck.findIndex(c => !c);
-          if (firstEmpty !== -1) {
-            deck[firstEmpty] = card;
-            renderDeck();
-            renderCards();
-            updateSaveButton();
-          }
-        });
-        cardDiv.addEventListener('dragstart', e => {
-          e.dataTransfer.setData('type', 'card-list');
-          e.dataTransfer.setData('cardKey', card.key);
-          cardDiv.classList.add('dragging');
-        });
-        cardDiv.addEventListener('dragend', () => {
-          cardDiv.classList.remove('dragging');
-        });
-        groupDiv.appendChild(cardDiv);
+    
+    // Get keys of cards already in deck
+    const deckCardKeys = deck.filter(c => c !== null).map(c => c.key);
+    
+    // Filter out cards that are already in the deck
+    const availableCards = cards.filter(c => !deckCardKeys.includes(c.key));
+    
+    // Create a card element for each available card
+    availableCards.forEach(card => {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card';
+      cardDiv.draggable = true;
+      
+      // Elixir cost badge (purple background, gold text)
+      const elixirBadge = document.createElement('div');
+      elixirBadge.className = 'elixir';
+      elixirBadge.textContent = card.elixir;
+      cardDiv.appendChild(elixirBadge);
+      
+      // Stats icon (crown)
+      const statIcon = document.createElement('span');
+      statIcon.className = 'stats-icon';
+      statIcon.innerHTML = '&#x1F451;'; // crown emoji
+      statIcon.title = 'View stats';
+      statIcon.addEventListener('click', e => {
+        e.stopPropagation();
+        openStatsPopup(card);
       });
-      cardsListEl.appendChild(groupDiv);
+      cardDiv.appendChild(statIcon);
+      
+      // Card image (doubled size)
+      const img = document.createElement('img');
+      img.src = card.img;
+      img.alt = card.name;
+      cardDiv.appendChild(img);
+      
+      // Click to add to deck
+      cardDiv.addEventListener('click', () => {
+        const firstEmpty = deck.findIndex(c => !c);
+        if (firstEmpty !== -1) {
+          deck[firstEmpty] = card;
+          renderDeck();
+          renderCards();
+          updateSaveButton();
+        }
+      });
+      
+      // Drag and drop
+      cardDiv.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('type', 'card-list');
+        e.dataTransfer.setData('cardKey', card.key);
+        cardDiv.classList.add('dragging');
+      });
+      
+      cardDiv.addEventListener('dragend', () => {
+        cardDiv.classList.remove('dragging');
+      });
+      
+      cardsListEl.appendChild(cardDiv);
     });
   }
   // Update Save button enable/disable based on deck & name
