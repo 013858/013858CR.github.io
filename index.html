@@ -137,16 +137,29 @@
     font-size: 18px;
     color: gold; /* changed color to gold */
   }
-  /* Removed card-group styling and adjusted cards-list */
+  /* stacked groups vertically, cards inside group horizontally */
   #cards-list {
     margin-top: 10px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column; /* vertical stack */
+    gap: 20px;
   }
-  /* Combined card style from card-group and card */
+  .card-group {
+    max-width: 100%;
+    display: flex;       /* cards side by side */
+    gap: 10px;          /* cards closer horizontally */
+    flex-wrap: wrap;     /* wrap cards if needed */
+  }
+  .card-group h3 {
+    width: 100%;
+    margin-top: 0;
+    border-bottom: 2px solid #daa520;
+    padding-bottom: 5px;
+    color: #facc15;
+  }
   .card {
     display: flex;
+    flex-direction: column;
     align-items: center;
     margin: 8px 0;
     padding: 4px 6px;
@@ -157,7 +170,6 @@
     user-select: none;
     transition: background 0.2s ease;
     position: relative;
-    min-width: 18px;
   }
   .card:active {
     cursor: grabbing;
@@ -166,25 +178,34 @@
     background: #fde68a;
   }
   .card img {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 6px;
     pointer-events: none;
   }
   .card .elixir {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: purple;
+    color: gold;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: bold;
-    color: #b45309;
-    min-width: 22px;
-    text-align: center;
-  }
-  .card .name {
-    flex: 1;
+    font-size: 12px;
+    z-index: 1;
   }
   .stats-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
     cursor: pointer;
     user-select: none;
-    margin-left: 6px;
-    font-size: 16px;
+    font-size: 18px;
     color: gold;
   }
   #saved-decks-container {
@@ -410,7 +431,7 @@
     </form>
   </div>
   <div id="cards-list" aria-label="Available cards">
-    <!-- cards will be rendered here in a single list -->
+    <!-- cards grouped by type rendered here -->
   </div>
 </div>
 <div id="saved-decks-container" aria-live="polite" aria-atomic="true">
@@ -944,61 +965,61 @@
     }
     updateAverageElixir();
   }
-  // Render all cards in a single list, excluding those already in deck
+  // Render cards grouped by type, excluding those already in deck
   function renderCards() {
     cardsListEl.innerHTML = '';
-    
-    // Get keys of cards already in deck
-    const deckCardKeys = deck.filter(c => c !== null).map(c => c.key);
-    
-    // Filter out cards that are already in the deck and sort by elixir cost and name
-    const availableCards = cards.filter(c => !deckCardKeys.includes(c.key));
-    
-    // Create a card element for each available card
-    availableCards.forEach(card => {
-      const cardDiv = document.createElement('div');
-      cardDiv.className = 'card';
-      cardDiv.draggable = true;
-      const img = document.createElement('img');
-      img.src = card.img;
-      img.alt = card.name;
-      cardDiv.appendChild(img);
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'name';
-      nameSpan.textContent = card.name;
-      cardDiv.appendChild(nameSpan);
-      const elixirSpan = document.createElement('span');
-      elixirSpan.className = 'elixir';
-      elixirSpan.textContent = card.elixir;
-      cardDiv.appendChild(elixirSpan);
-      // Stat sheet icon (crown)
-      const statIcon = document.createElement('span');
-      statIcon.className = 'stats-icon';
-      statIcon.innerHTML = '&#x1F451;'; // crown emoji
-      statIcon.title = 'View stats';
-      statIcon.addEventListener('click', e => {
-        e.stopPropagation();
-        openStatsPopup(card);
+    const groups = { troop: [], spell: [], building: [] };
+    deck.forEach(c => { if (c) groups[c.type].push(c.key); });
+    ['troop', 'spell', 'building'].forEach(type => {
+      const groupCards = cards.filter(c => c.type === type && !groups[type].includes(c.key));
+      if (groupCards.length === 0) return;
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'card-group';
+      const groupTitle = document.createElement('h3');
+      groupTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1) + 's';
+      groupDiv.appendChild(groupTitle);
+      groupCards.forEach(card => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card';
+        cardDiv.draggable = true;
+        const img = document.createElement('img');
+        img.src = card.img;
+        img.alt = card.name;
+        cardDiv.appendChild(img);
+        const elixirBadge = document.createElement('div');
+        elixirBadge.classList.add('elixir');
+        elixirBadge.textContent = card.elixir;
+        cardDiv.appendChild(elixirBadge);
+        // Stat sheet icon (crown)
+        const statIcon = document.createElement('span');
+        statIcon.className = 'stats-icon';
+        statIcon.innerHTML = '&#x1F451;'; // crown emoji
+        statIcon.title = 'View stats';
+        statIcon.addEventListener('click', e => {
+          e.stopPropagation();
+          openStatsPopup(card);
+        });
+        cardDiv.appendChild(statIcon);
+        cardDiv.addEventListener('click', () => {
+          const firstEmpty = deck.findIndex(c => !c);
+          if (firstEmpty !== -1) {
+            deck[firstEmpty] = card;
+            renderDeck();
+            renderCards();
+            updateSaveButton();
+          }
+        });
+        cardDiv.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('type', 'card-list');
+          e.dataTransfer.setData('cardKey', card.key);
+          cardDiv.classList.add('dragging');
+        });
+        cardDiv.addEventListener('dragend', () => {
+          cardDiv.classList.remove('dragging');
+        });
+        groupDiv.appendChild(cardDiv);
       });
-      cardDiv.appendChild(statIcon);
-      cardDiv.addEventListener('click', () => {
-        const firstEmpty = deck.findIndex(c => !c);
-        if (firstEmpty !== -1) {
-          deck[firstEmpty] = card;
-          renderDeck();
-          renderCards();
-          updateSaveButton();
-        }
-      });
-      cardDiv.addEventListener('dragstart', e => {
-        e.dataTransfer.setData('type', 'card-list');
-        e.dataTransfer.setData('cardKey', card.key);
-        cardDiv.classList.add('dragging');
-      });
-      cardDiv.addEventListener('dragend', () => {
-        cardDiv.classList.remove('dragging');
-      });
-      cardsListEl.appendChild(cardDiv);
+      cardsListEl.appendChild(groupDiv);
     });
   }
   // Update Save button enable/disable based on deck & name
