@@ -102,16 +102,6 @@
     font-weight: bold;
     font-size: 14px;
   }
-  /* Stat icon in deck slot */
-  .deck-slot .stats-icon {
-    position: absolute;
-    bottom: 4px;
-    right: 6px;
-    cursor: pointer;
-    font-size: 18px;
-    color: gold;
-    user-select: none;
-  }
   /* Tower icon next to deck */
   #deck-and-tower {
     display: flex;
@@ -877,16 +867,7 @@
         elixirBadge.classList.add('elixir');
         elixirBadge.textContent = card.elixir;
         slot.appendChild(elixirBadge);
-        // Add stat icon (crown)
-        const statIcon = document.createElement('span');
-        statIcon.className = 'stats-icon';
-        statIcon.innerHTML = '&#x1F451;'; // crown emoji
-        statIcon.title = 'View stats';
-        statIcon.addEventListener('click', e => {
-          e.stopPropagation();
-          openStatsPopup(card);
-        });
-        slot.appendChild(statIcon);
+        // No stats icon in deck slots - removed as requested
       }
       slot.dataset.index = i;
       slot.setAttribute('role', 'listitem');
